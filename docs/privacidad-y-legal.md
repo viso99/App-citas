@@ -25,8 +25,8 @@ Son decisiones técnicas tomadas por Claude (D-5), coherentes con lo de arriba. 
 6. **Borrar la cuenta borra los datos:** la persona puede eliminar su cuenta y sus datos desde la app.
 7. **Fotos privadas por defecto en el almacenamiento:** solo las ve un usuario que tiene permiso de verlas, no cualquiera con el enlace.
 8. **Chat privado:** solo lo leen las dos personas que coincidieron. Las reglas de acceso se aplican en la base de datos, no solo en la pantalla.
-9. **Bloquear** corta todo contacto en las dos direcciones. **Denunciar** guarda la denuncia para revisión.
+9. **Bloquear** corta todo contacto en las dos direcciones. **Denunciar** guarda la denuncia para revisión y bloquea (D-14). Las denuncias no se ven desde la app: solo quien revisa, en Supabase.
 
 ## Antes de abrir la app a usuarios reales
 
-Pendientes en [pendientes.md](pendientes.md): política de privacidad y condiciones de uso, revisión legal profesional, quién revisa las denuncias y en qué plazo, y cómo se verifica la edad.
+Pendientes en [pendientes.md](pendientes.md): política de privacidad y condiciones de uso, revisión legal profesional, en qué plazo se revisan las denuncias, y cómo se verifica la edad.
