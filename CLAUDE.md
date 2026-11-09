@@ -8,7 +8,7 @@ Leé este archivo entero al empezar cada sesión. Es corto a propósito: dice qu
 - **Plataforma [Confirmado 2026-11-09]:** **web pensada para el celular**, que se abre en el navegador y se puede agregar a la pantalla de inicio. Las apps de las tiendas quedan para después.
 - **Primera versión [Confirmado 2026-11-09]:** registro de mayores de 18 y perfil con fotos, ver gente cercana y deslizar, coincidencia mutua, chat entre quienes coincidieron, y bloquear y denunciar. Nada más.
 - **Tecnología (D-6):** Next.js 16 con TypeScript y Supabase (en la UE). **Next.js 16 cambió mucho:** leé `AGENTS.md` antes de escribir código de Next.
-- **Estado del código:** registro con correo y código y perfil con fotos, hechos en código pero sin probar contra un Supabase real. El resto de la primera versión no existe todavía. Ver [docs/estado-actual.md](docs/estado-actual.md).
+- **Estado del código:** registro y perfil con fotos funcionando (probado por Sergio). Descubrir hecho en código, pendiente de probar. Coincidencias, chat y bloquear/denunciar no existen todavía. Ver [docs/estado-actual.md](docs/estado-actual.md).
 
 ## Mapa de la documentación
 

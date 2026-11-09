@@ -51,7 +51,7 @@ function EnterForm() {
       setError("El código no es correcto o ha caducado.");
       return;
     }
-    router.replace("/perfil");
+    router.replace("/descubrir");
     router.refresh();
   }
 

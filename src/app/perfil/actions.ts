@@ -1,16 +1,17 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { validatePreferences, type PreferenceErrors, type Preferences } from "@/lib/discover";
 import { photoCountError, validateProfile, type ProfileErrors, type ProfileInput } from "@/lib/profile";
 import { getUser } from "@/lib/supabase/server";
 
-export type SaveResult = { ok: true } | { ok: false; errors: ProfileErrors; message?: string };
+export type SaveResult = { ok: true } | { ok: false; errors: ProfileErrors & PreferenceErrors; message?: string };
 
-export async function saveProfile(input: ProfileInput): Promise<SaveResult> {
+export async function saveProfile(input: ProfileInput, preferences: Preferences): Promise<SaveResult> {
   const { supabase, user } = await getUser();
   if (!user) redirect("/entrar");
 
-  const errors = validateProfile(input);
+  const errors = { ...validateProfile(input), ...validatePreferences(preferences) };
   if (Object.keys(errors).length > 0) return { ok: false, errors };
 
   const { count, error: countError } = await supabase
@@ -34,6 +35,9 @@ export async function saveProfile(input: ProfileInput): Promise<SaveResult> {
     bio: input.bio.trim(),
     gender: input.gender,
     interested_in: input.interestedIn,
+    min_age: preferences.minAge,
+    max_age: preferences.maxAge,
+    max_distance_km: preferences.maxDistanceKm,
     // Se conserva la fecha del primer consentimiento.
     sensitive_data_consent_at: existing?.sensitive_data_consent_at ?? new Date().toISOString(),
   });

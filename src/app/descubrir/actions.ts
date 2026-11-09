@@ -1,0 +1,52 @@
+"use server";
+
+import { redirect } from "next/navigation";
+import cities from "@/data/ciudades-es.json";
+import { isValidLocation, searchCities, type City } from "@/lib/discover";
+import { getUser } from "@/lib/supabase/server";
+import { loadCards, type Card } from "./cards";
+
+const CITY_LIST = cities as City[];
+
+export type CityOption = { index: number; label: string };
+
+export async function findCities(query: string): Promise<CityOption[]> {
+  return searchCities(CITY_LIST, String(query)).map((index) => ({
+    index,
+    label: `${CITY_LIST[index][0]} (${CITY_LIST[index][1]})`,
+  }));
+}
+
+// Guarda la ubicación del móvil. La base la redondea a unos 2 km antes de guardarla (D-12).
+export async function saveDeviceLocation(lat: number, lon: number): Promise<{ ok: boolean }> {
+  if (!isValidLocation(lat, lon)) return { ok: false };
+  return saveLocation(lat, lon);
+}
+
+// Guarda la ubicación de una ciudad de la lista, para quien no da permiso de ubicación.
+export async function saveCityLocation(index: number): Promise<{ ok: boolean }> {
+  const city = Number.isInteger(index) ? CITY_LIST[index] : undefined;
+  if (!city) return { ok: false };
+  return saveLocation(city[2], city[3]);
+}
+
+async function saveLocation(lat: number, lon: number) {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/entrar");
+  const { data, error } = await supabase.from("profiles").update({ lat, lon }).eq("id", user.id).select("id");
+  return { ok: !error && (data?.length ?? 0) === 1 };
+}
+
+export async function swipe(targetId: string, choice: "me_gusta" | "paso"): Promise<{ ok: boolean }> {
+  if (choice !== "me_gusta" && choice !== "paso") return { ok: false };
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/entrar");
+  const { error } = await supabase.rpc("swipe", { target: targetId, choice });
+  return { ok: !error };
+}
+
+export async function nextCards(): Promise<Card[]> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/entrar");
+  return loadCards(supabase);
+}
