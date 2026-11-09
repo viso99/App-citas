@@ -44,3 +44,7 @@ Detalles técnicos (se pueden revisar): Supabase Auth con código de un solo uso
 El perfil lleva solo: **nombre de pila, fecha de nacimiento** (para mostrar la edad y frenar a menores), **de 2 a 6 fotos**, **descripción corta opcional**, **género** y **a quién quiere conocer** (hombres, mujeres o todos).
 *Por qué:* Sergio aprobó el mínimo propuesto: cada dato extra es más que proteger por el RGPD y más pasos antes de usar la app. Intereses, altura, trabajo, etc. se suman si los usuarios lo piden.
 Detalles técnicos (se pueden revisar): nombre de 1 a 40 caracteres, descripción hasta 500, fotos JPG, PNG o WebP de hasta 5 MB en almacenamiento privado. Antes de guardar género y preferencia se pide consentimiento explícito (RGPD art. 9) y se guarda cuándo se dio. Las reglas críticas también están en la base de datos ([arquitectura.md](arquitectura.md)).
+
+**D-9 · 2026-11-09 · vigente**
+Las opciones de género del perfil son **Mujer, Hombre y No binario** (antes supuesto S-3).
+*Por qué:* Sergio dijo que personalmente no está de acuerdo con la opción "No binario", pero aceptó dejarla si funciona mejor para el producto. Se le recomendó dejarla porque es lo habitual en las apps de citas en España, no cambia nada para quien no la elige (cada persona solo ve a quien eligió conocer) y sacarla puede traer quejas y malas reseñas al empezar. Se puede revisar si Sergio lo pide.

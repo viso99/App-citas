@@ -10,7 +10,7 @@ export const MAX_PHOTOS = 6;
 export const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
 export const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 
-// [Supuesto] S-3: las opciones de género son estas tres (docs/pendientes.md).
+// Opciones de género confirmadas en D-9 (docs/decisiones.md).
 export const GENDERS = {
   mujer: "Mujer",
   hombre: "Hombre",

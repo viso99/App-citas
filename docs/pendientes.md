@@ -8,7 +8,6 @@ Lo que **todavía no está decidido**. Nada de esta página es un hecho. Cuando 
 |---|---|---|---|
 | S-1 | El público es general (adultos de cualquier orientación), no un nicho | Es lo habitual en una app "estilo Tinder" | Preguntarle a Sergio antes de diseñar el perfil |
 | S-2 | La app solo está en español de España al principio | Se lanza en España (D-4) | Preguntarle a Sergio si quiere también inglés o catalán |
-| S-3 | Las opciones de género son **Mujer, Hombre y No binario** | D-8 dice "género" sin fijar las opciones; son las más comunes en apps de citas | Preguntarle a Sergio. Cambiarlas requiere una migración (`public.gender`) |
 
 ## Preguntas abiertas (para decidir con Sergio)
 
