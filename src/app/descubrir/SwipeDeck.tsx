@@ -19,6 +19,7 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
   const [leaving, setLeaving] = useState<Choice | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [exhausted, setExhausted] = useState(initialCards.length === 0);
+  const [matchWith, setMatchWith] = useState<Card | null>(null);
   const decided = useRef(new Set<string>());
   const loading = useRef(false);
   const start = useRef<{ x: number; y: number } | null>(null);
@@ -55,8 +56,9 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
       setDx(0);
       setPhoto(0);
     }, 200);
-    swipe(target.id, choice).then(({ ok }) => {
+    swipe(target.id, choice).then(({ ok, match }) => {
       if (!ok) setError("No pudimos guardar tu respuesta. Comprueba la conexión.");
+      else if (match) setMatchWith(target);
     });
   }
 
@@ -86,9 +88,12 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
     else setDx(0);
   }
 
+  const overlay = matchWith && <MatchOverlay card={matchWith} onClose={() => setMatchWith(null)} />;
+
   if (!card) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+        {overlay}
         <p className="text-lg">{exhausted ? "No hay más perfiles cerca por ahora." : "Buscando perfiles…"}</p>
         {exhausted && (
           <p className="text-zinc-600 dark:text-zinc-300">
@@ -109,6 +114,7 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
 
   return (
     <div className="flex flex-1 flex-col gap-4">
+      {overlay}
       <div
         key={card.id}
         role="group"
@@ -178,6 +184,37 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
         </button>
       </div>
       {error && <p className="text-center text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+function MatchOverlay({ card, onClose }: { card: Card; onClose: () => void }) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="match-title"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-rose-600/95 px-6 text-center text-white"
+    >
+      <h2 id="match-title" className="text-4xl font-bold">
+        ¡Es una coincidencia!
+      </h2>
+      {card.photos[0] && (
+        // eslint-disable-next-line @next/next/no-img-element -- enlaces firmados y temporales
+        <img src={card.photos[0]} alt="" className="h-40 w-40 rounded-full border-4 border-white object-cover" />
+      )}
+      <p className="text-lg">A {card.firstName} y a ti os habéis gustado.</p>
+      <div className="flex w-full max-w-xs flex-col gap-3">
+        <Link
+          href="/coincidencias"
+          className="rounded-full bg-white px-6 py-3 text-lg font-semibold text-rose-600"
+        >
+          Ver mis coincidencias
+        </Link>
+        <button type="button" onClick={onClose} className="rounded-full border-2 border-white px-6 py-3 text-lg font-semibold">
+          Seguir descubriendo
+        </button>
+      </div>
     </div>
   );
 }

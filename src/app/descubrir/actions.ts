@@ -37,12 +37,16 @@ async function saveLocation(lat: number, lon: number) {
   return { ok: !error && (data?.length ?? 0) === 1 };
 }
 
-export async function swipe(targetId: string, choice: "me_gusta" | "paso"): Promise<{ ok: boolean }> {
-  if (choice !== "me_gusta" && choice !== "paso") return { ok: false };
+// Devuelve `match: true` si el "me gusta" era mutuo y se creó una coincidencia.
+export async function swipe(
+  targetId: string,
+  choice: "me_gusta" | "paso",
+): Promise<{ ok: boolean; match: boolean }> {
+  if (choice !== "me_gusta" && choice !== "paso") return { ok: false, match: false };
   const { supabase, user } = await getUser();
   if (!user) redirect("/entrar");
-  const { error } = await supabase.rpc("swipe", { target: targetId, choice });
-  return { ok: !error };
+  const { data, error } = await supabase.rpc("swipe", { target: targetId, choice });
+  return { ok: !error, match: !error && data === true };
 }
 
 export async function nextCards(): Promise<Card[]> {

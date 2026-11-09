@@ -4,7 +4,7 @@ import { supabaseConfig } from "@/lib/supabase/config";
 
 // Se ejecuta antes de cada página: renueva la sesión de Supabase (cookies) y manda a
 // /entrar a quien quiera ver una página privada sin haber iniciado sesión.
-const PRIVATE_PATHS = ["/perfil", "/descubrir"];
+const PRIVATE_PATHS = ["/perfil", "/descubrir", "/coincidencias"];
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
