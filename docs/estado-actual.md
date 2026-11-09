@@ -2,7 +2,7 @@
 
 Qué hay **realmente** en el repo. No es lo que el producto debe hacer: eso está en [producto.md](producto.md). Cómo está organizado el código: [arquitectura.md](arquitectura.md).
 
-**[Verificado 2026-11-09]** en la rama `claude/registro-perfil`: lint, typecheck, 12 pruebas y build pasan. **[Verificado 2026-11-09]** el proyecto de Supabase `app-citas` existe (región eu-west-1, Irlanda) y tiene aplicada la migración `20261109000000_perfiles.sql` (8 políticas en las tablas, 3 en el almacenamiento, bucket privado). Registro, fotos y guardado todavía no se vieron funcionar de punta a punta.
+**[Verificado 2026-11-09]** en la rama `claude/entrar-con-enlace`: lint, typecheck, 12 pruebas y build pasan. **[Verificado 2026-11-09]** el proyecto de Supabase `app-citas` existe (región eu-west-1, Irlanda) y tiene aplicada la migración `20261109000000_perfiles.sql` (8 políticas en las tablas, 3 en el almacenamiento, bucket privado). Registro, fotos y guardado todavía no se vieron funcionar de punta a punta.
 
 ## Primera versión: qué está hecho
 
