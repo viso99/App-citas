@@ -62,3 +62,7 @@ Un **"paso" esconde el perfil 30 días**; después puede volver a aparecer. Un *
 La ubicación se toma **del móvil, con permiso**, y se guarda **redondeada a unos 2 km**. Si la persona no da permiso, **elige su ciudad o pueblo** de una lista. A los demás solo se les muestra "a N km" (nunca menos de "a menos de 2 km").
 *Por qué:* Sergio eligió la opción recomendada: es lo que la gente espera, y al redondear nunca se guarda ni se muestra dónde está alguien exactamente (regla 3 de [privacidad-y-legal.md](privacidad-y-legal.md)).
 Detalles técnicos (se pueden revisar): la base redondea a una cuadrícula de 0,02 grados aunque la app mande una ubicación precisa. La distancia se calcula con la fórmula del haversine en SQL, **sin PostGIS**: con pocos usuarios alcanza y evita una extensión más; se puede pasar a PostGIS si crece. La lista de municipios (2.824 de España con más de 1.000 habitantes) sale de GeoNames (licencia CC BY 4.0, hay que citarla) a través del paquete `all-the-cities` 3.1.0, y está en `src/data/ciudades-es.json`.
+
+**D-13 · 2026-11-09 · vigente**
+Claude **aplica él mismo en Supabase los cambios de la base que solo agregan cosas** (tablas, columnas, funciones, reglas de acceso) y lo avisa en el PR. **Si un cambio borra o modifica datos, le pregunta a Sergio antes.**
+*Por qué:* Sergio eligió la opción recomendada para no frenar cada PR. Todavía no hay usuarios reales. Es una excepción acotada a "pasos que no se pueden deshacer" de D-5.

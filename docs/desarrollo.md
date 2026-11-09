@@ -12,7 +12,7 @@
 - **Supabase:** proyecto `app-citas` (ref `wrjewtfkvzhcwmltpgvw`), región eu-west-1 (Irlanda). Migraciones aplicadas a mano desde SQL Editor.
 - **Vercel:** proyecto `viso99/app-citas`, dirección de prueba **https://app-citas-khaki.vercel.app**. Se publica solo con cada cambio en `main`. Variables: `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 - **URL Configuration de Supabase:** Site URL = la dirección de Vercel; Redirect URLs = `https://app-citas-khaki.vercel.app/**` y `http://localhost:3000/**`.
-- Una migración nueva **no** se aplica sola: hay que ejecutarla en SQL Editor (o con la CLI) antes o junto con el merge que la usa.
+- Una migración nueva **no** se aplica sola: hay que ejecutarla en SQL Editor (o con la CLI) antes o junto con el merge que la usa. Las que solo agregan cosas las aplica Claude y lo avisa en el PR; las que borran o cambian datos, con el visto bueno de Sergio (D-13).
 
 ## Configurar Supabase (una sola vez)
 
