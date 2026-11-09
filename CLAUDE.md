@@ -7,7 +7,8 @@ Leé este archivo entero al empezar cada sesión. Es corto a propósito: dice qu
 - **Producto [Confirmado 2026-11-09]:** una app de citas al estilo de Tinder (ver perfiles, deslizar, coincidir y chatear), con **nombre, marca y diseño propios**. Es un **producto real** para lanzar con usuarios, empezando en **España**. Detalle en [docs/producto.md](docs/producto.md).
 - **Plataforma [Confirmado 2026-11-09]:** **web pensada para el celular**, que se abre en el navegador y se puede agregar a la pantalla de inicio. Las apps de las tiendas quedan para después.
 - **Primera versión [Confirmado 2026-11-09]:** registro de mayores de 18 y perfil con fotos, ver gente cercana y deslizar, coincidencia mutua, chat entre quienes coincidieron, y bloquear y denunciar. Nada más.
-- **Estado del código [Verificado 2026-11-09]:** el repo está vacío (solo `README.md`). Todavía **no existe** ninguna pantalla, tabla, endpoint ni función. Ver [docs/estado-actual.md](docs/estado-actual.md).
+- **Tecnología (D-6):** Next.js 16 con TypeScript y Supabase (en la UE). **Next.js 16 cambió mucho:** leé `AGENTS.md` antes de escribir código de Next.
+- **Estado del código:** registro con correo y código y perfil con fotos, hechos en código pero sin probar contra un Supabase real. El resto de la primera versión no existe todavía. Ver [docs/estado-actual.md](docs/estado-actual.md).
 
 ## Mapa de la documentación
 
@@ -15,6 +16,8 @@ Leé este archivo entero al empezar cada sesión. Es corto a propósito: dice qu
 |---|---|---|
 | Qué se construye, para quién y qué entra en la primera versión | [docs/producto.md](docs/producto.md) | Antes de proponer o implementar cualquier funcionalidad |
 | Qué hay realmente en el repo hoy | [docs/estado-actual.md](docs/estado-actual.md) | Antes de tocar código o de afirmar que algo existe |
+| Cómo está organizado el código y la base de datos | [docs/arquitectura.md](docs/arquitectura.md) | Antes de agregar pantallas, tablas o reglas |
+| Cómo correr, probar y configurar Supabase | [docs/desarrollo.md](docs/desarrollo.md) | Antes de compilar o verificar un cambio |
 | Decisiones tomadas y por qué | [docs/decisiones.md](docs/decisiones.md) | Antes de cambiar rumbo, tecnología o alcance |
 | Privacidad, edad y obligaciones legales (RGPD) | [docs/privacidad-y-legal.md](docs/privacidad-y-legal.md) | Antes de tocar registro, perfiles, fotos, ubicación, chat o datos de usuarios |
 | Preguntas abiertas y supuestos | [docs/pendientes.md](docs/pendientes.md) | Antes de decidir algo que todavía no está cerrado |
@@ -68,6 +71,7 @@ Si algo no tiene etiqueta, tratalo como supuesto.
 - Cuando cambie una decisión, una funcionalidad o una regla importante, actualizá el doc del tema **en el mismo PR** que el cambio.
 - Una decisión nueva va a `docs/decisiones.md` con fecha, estado y porqué. Si reemplaza a otra, marcá la vieja como "reemplazada por D-N"; no la borres.
 - Cuando se resuelva un pendiente, sacalo de `docs/pendientes.md` y llevalo a `decisiones.md` o al doc del tema.
-- Cuando cambie el código, actualizá `docs/estado-actual.md` con la nueva fecha de verificación.
+- Cuando cambie el código, actualizá `docs/estado-actual.md` (y `docs/arquitectura.md` si cambia la estructura o la base) con la nueva fecha de verificación.
+- Antes de abrir un PR con código: `npm run lint`, `npm run typecheck`, `npm test` y `npm run build` tienen que pasar.
 - Cada dato vive en **un solo lugar**: los demás docs lo enlazan, no lo copian. Este archivo solo resume y apunta.
 - Si un doc pasa de ~150 líneas, dividilo por tema y sumalo al mapa de arriba.
