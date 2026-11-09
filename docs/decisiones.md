@@ -75,3 +75,7 @@ Detalles técnicos (se pueden revisar): todo pasa por las funciones `block_user(
 **D-15 · 2026-11-09 · vigente** (antes P-1, en parte)
 La app se llama **Zuvi**: una palabra inventada, corta y fácil de decir.
 *Por qué:* Sergio prefirió una palabra inventada (más fácil de registrar y de conseguir dominio) y eligió Zuvi entre varias. "Luvi" se descartó porque ya existe una app de EE. UU. con ese nombre y sus dominios están tomados. **[Verificado 2026-11-09]** zuvi.es y zuvi.app no existían en DNS (zuvi.com sí). En la oficina de marcas de EE. UU. hay marcas "ZUVI" de secadores y productos de pelo y de suplementos, ninguna de apps ni de citas en lo que se pudo ver. Falta buscar en las oficinas de España y la UE, y no es una revisión legal (P-1, P-9).
+
+**D-16 · 2026-11-09 · vigente (provisional)**
+Los correos de acceso salen **por el Gmail de Sergio** (SMTP de Google con contraseña de aplicación) en vez del envío de prueba de Supabase, y vuelven a traer **código** (D-7).
+*Por qué:* Sergio eligió la opción recomendada: el envío de prueba de Supabase permite unos 2 correos por hora y no deja mandar código. Con Gmail es gratis y alcanza para probar. **Antes de abrir a gente real** se cambia por una dirección de zuvi.es con un servicio de correo (P-1), para no mostrar el correo personal de Sergio.

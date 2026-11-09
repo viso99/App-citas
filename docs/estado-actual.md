@@ -8,7 +8,7 @@ Qué hay **realmente** en el repo. No es lo que el producto debe hacer: eso est�
 
 | Parte (de [producto.md](producto.md)) | Estado |
 |---|---|
-| 1. Registro y perfil | **Hecho y probado por Sergio en el celular.** Registro y entrada con correo (por ahora llega un enlace, que hay que abrir en el mismo navegador; la pantalla ya no pide código. El código llegará cuando haya servicio de correo propio). Perfil con nombre, fecha de nacimiento (18+), descripción opcional, género, a quién quiere conocer, consentimiento y de 2 a 6 fotos privadas |
+| 1. Registro y perfil | **Hecho y probado por Sergio en el celular.** Registro y entrada con correo (llega un código y un enlace; la app pide el código). Perfil con nombre, fecha de nacimiento (18+), descripción opcional, género, a quién quiere conocer, consentimiento y de 2 a 6 fotos privadas |
 | 2. Descubrir y deslizar | **Publicado, sin probar con gente real.** Ubicación aproximada (móvil o ciudad), preferencias de edad y distancia, tarjetas con fotos, deslizar o botones de "me gusta" y "paso" |
 | 3. Coincidencias | **Publicado, sin probar con gente real.** Un "me gusta" mutuo crea la coincidencia: aviso "¡Es una coincidencia!" en Descubrir y pantalla `/coincidencias` con la lista (foto, nombre, edad y fecha). Todavía no se puede deshacer una coincidencia |
 | 4. Chat | **Hecho en código (rama `claude/chat`), sin probar con gente real.** Desde la lista de coincidencias se abre `/chat/<id>`: mensajes de texto (hasta 1.000 caracteres) que llegan en tiempo real, con la hora. La lista muestra el último mensaje y se ordena por actividad. Sin fotos, sin avisos de mensaje nuevo fuera de la app y sin "leído" |
@@ -20,4 +20,4 @@ Qué hay **realmente** en el repo. No es lo que el producto debe hacer: eso est�
 - Las fotos no se pueden reordenar: quedan en el orden en que se subieron.
 - La coincidencia solo se avisa a quien da el segundo "me gusta" (en ese momento). La otra persona la ve en su lista, sin notificación.
 - No se puede deshacer un "paso" ni un "me gusta", ni quitar un bloqueo.
-- Los correos de acceso usan el envío de prueba de Supabase, con un límite muy bajo: **[Verificado 2026-11-09]** al pasarlo, Supabase responde 429 `over_email_send_rate_limit` y la app pide esperar un rato. Hace falta un servicio de correo propio antes de abrir a más gente (ver [desarrollo.md](desarrollo.md)).
+- Los correos de acceso salen provisionalmente por el Gmail de Sergio (D-16), con un límite de 30 por hora. Si se pasa, la app pide esperar un rato. Antes de abrir a gente real hay que pasarlos a una dirección de zuvi.es.

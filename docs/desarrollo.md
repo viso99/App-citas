@@ -18,9 +18,9 @@
 
 1. Crear el proyecto en [supabase.com](https://supabase.com) eligiendo una región de la UE (por ejemplo, Frankfurt).
 2. **Base de datos:** en SQL Editor, ejecutar en orden los archivos de `supabase/migrations/`. (Con la CLI de Supabase: `supabase link` y `supabase db push`.)
-3. **Correo de acceso (D-7):** **[Verificado 2026-11-09]** sin un servicio de correo propio (SMTP), Supabase no deja editar las plantillas y manda solo un **enlace**. La app acepta las dos cosas: el enlace lleva a `/auth/confirmar`, que inicia la sesión (hay que abrirlo en el mismo navegador donde se pidió). Cuando haya SMTP, en Authentication → Emails → "Magic link or OTP" agregar `{{ .Token }}` a la plantilla para que llegue también el código.
+3. **Correo de acceso (D-7):** el correo trae un **código** (`{{ .Token }}`) y un **enlace**. La app pide el código; el enlace lleva a `/auth/confirmar` y solo funciona en el mismo navegador donde se pidió. La plantilla se edita en Authentication → Emails → "Magic link" (hace falta SMTP propio, D-16).
    En Authentication → URL Configuration, el **Site URL** y las **Redirect URLs** tienen que incluir la dirección donde está publicada la app (y `http://localhost:3000/**` para desarrollo).
-4. **Correos reales:** el envío de correos incluido en Supabase es solo para pruebas y tiene un límite muy bajo por hora. Antes de abrir a más gente hace falta un servicio de correo propio (SMTP), que puede tener costo: lo decide Sergio.
+4. **Envío de correos (D-16):** **[Verificado 2026-11-09]** sale por el Gmail de Sergio (SMTP `smtp.gmail.com`, puerto 465, contraseña de aplicación que cargó él), con nombre "Zuvi". Límite: 30 correos por hora y 60 segundos entre correos a la misma dirección (Authentication → Rate Limits). Antes de abrir a gente real hay que pasarlo a una dirección de zuvi.es (P-1).
 5. Copiar `.env.example` a `.env.local` y completar la URL y la clave "publishable" (Project Settings → API).
 
 ## Comandos

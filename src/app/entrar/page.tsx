@@ -1,13 +1,13 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-// Registro e inicio de sesión con correo (D-7): la misma pantalla sirve para las dos cosas.
-// Si el correo no tiene cuenta, Supabase la crea. Mientras no haya un servicio de correo
-// propio, el correo trae un enlace (no un código): lleva a /auth/confirmar, que inicia la
-// sesión. Tiene que abrirse en el mismo navegador porque el enlace se valida con una cookie.
+// Registro e inicio de sesión con correo y código (D-7): la misma pantalla sirve para las dos
+// cosas. Si el correo no tiene cuenta, Supabase la crea. El correo trae el código y también
+// un enlace (lleva a /auth/confirmar); el enlace solo funciona en el mismo navegador porque se
+// valida con una cookie, por eso se pide el código. La plantilla está en docs/desarrollo.md.
 export default function EnterPage() {
   return (
     <Suspense>
@@ -17,8 +17,10 @@ export default function EnterPage() {
 }
 
 function EnterForm() {
+  const router = useRouter();
   const linkFailed = useSearchParams().get("error") === "enlace";
   const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const [step, setStep] = useState<"email" | "sent">("email");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +44,20 @@ function EnterForm() {
       return;
     }
     setStep("sent");
+  }
+
+  async function verifyCode(event: React.FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    setError(null);
+    const { error } = await createClient().auth.verifyOtp({ email: email.trim(), token: code.trim(), type: "email" });
+    setBusy(false);
+    if (error) {
+      setError("El código no es correcto o ha caducado.");
+      return;
+    }
+    router.replace("/descubrir");
+    router.refresh();
   }
 
   const input =
@@ -70,18 +86,40 @@ function EnterForm() {
           </button>
         </form>
       ) : (
-        <div className="flex flex-col gap-4">
-          <p className="text-lg">
-            Te hemos enviado un correo a <strong>{email}</strong>.
-          </p>
+        <form onSubmit={verifyCode} className="flex flex-col gap-4">
           <p className="text-zinc-600 dark:text-zinc-300">
-            Ábrelo y toca el enlace para entrar. Hazlo en este mismo navegador: si se abre en otro, no podrás entrar.
+            Te hemos enviado un correo a <strong>{email}</strong> con un código. Escríbelo aquí:
           </p>
-          <p className="text-sm text-zinc-500">Si no lo ves en unos minutos, mira en la carpeta de spam.</p>
-          <button type="button" onClick={() => setStep("email")} className="text-zinc-500 underline">
+          <label className="flex flex-col gap-2">
+            <span className="text-zinc-600 dark:text-zinc-300">Código</span>
+            <input
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              required
+              pattern="[0-9]{6,10}"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              className={`${input} tracking-widest`}
+            />
+          </label>
+          <button type="submit" disabled={busy} className={button}>
+            {busy ? "Comprobando…" : "Entrar"}
+          </button>
+          <p className="text-sm text-zinc-500">
+            También puedes tocar el enlace del correo si lo abres en este mismo navegador. Si no lo ves, mira en la
+            carpeta de spam.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setStep("email");
+              setCode("");
+            }}
+            className="text-zinc-500 underline"
+          >
             Usar otro correo
           </button>
-        </div>
+        </form>
       )}
       {linkFailed && !error && step === "email" && (
         <p className="text-red-600">El enlace no es válido o ha caducado. Pide uno nuevo.</p>
