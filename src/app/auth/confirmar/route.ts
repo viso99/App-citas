@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 
 // Destino del enlace del correo de acceso (D-7). Sin un servicio de correo propio, Supabase
 // manda un enlace en vez de un código: el enlace pasa por Supabase y vuelve acá con `code`
-// (o con `token_hash` si la plantilla del correo lo usa). Se crea la sesión y se va al perfil.
+// (o con `token_hash` si la plantilla del correo lo usa). Se crea la sesión y se va a Descubrir (que manda al perfil si todavía no existe).
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const code = searchParams.get("code");
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
   const target = request.nextUrl.clone();
   target.search = "";
-  target.pathname = ok ? "/perfil" : "/entrar";
+  target.pathname = ok ? "/descubrir" : "/entrar";
   if (!ok) target.searchParams.set("error", "enlace");
   return NextResponse.redirect(target);
 }

@@ -30,7 +30,7 @@ Se lanza primero en **España**, y la **primera versión** tiene solo: registro 
 Tecnología de partida:
 - **Next.js con TypeScript** para la web (una sola base de código para pantallas y servidor), instalable en el celular como web app (PWA).
 - **Supabase** como servicio de base de datos (PostgreSQL), usuarios e inicio de sesión, almacenamiento de fotos y mensajes en tiempo real para el chat, **en una región de la Unión Europea**.
-- Búsqueda por cercanía con **PostGIS** (extensión de PostgreSQL), guardando la ubicación aproximada, no la exacta.
+- Búsqueda por cercanía con **PostGIS** (extensión de PostgreSQL), guardando la ubicación aproximada, no la exacta. *(Cambiado en D-12: por ahora se calcula la distancia sin PostGIS.)*
 
 *Por qué:* cubre con pocas piezas lo que pide la primera versión (cuentas, fotos, cercanía, chat en tiempo real) y es muy usado y documentado. Alojar los datos en la UE simplifica el RGPD ([privacidad-y-legal.md](privacidad-y-legal.md)). Next.js deja abierta la puerta a una app de tiendas más adelante (por ejemplo, con React Native) reutilizando lógica. Se arranca con los planes gratuitos: **pasar a un plan pago lo decide Sergio** (D-5).
 *Estado:* todavía no se instaló nada ([estado-actual.md](estado-actual.md)). Si al empezar el código aparece una razón fuerte para cambiar algo, se registra como decisión nueva y se le avisa a Sergio.
@@ -48,3 +48,17 @@ Detalles técnicos (se pueden revisar): nombre de 1 a 40 caracteres, descripció
 **D-9 · 2026-11-09 · vigente**
 Las opciones de género del perfil son **Mujer, Hombre y No binario** (antes supuesto S-3).
 *Por qué:* Sergio dijo que personalmente no está de acuerdo con la opción "No binario", pero aceptó dejarla si funciona mejor para el producto. Se le recomendó dejarla porque es lo habitual en las apps de citas en España, no cambia nada para quien no la elige (cada persona solo ve a quien eligió conocer) y sacarla puede traer quejas y malas reseñas al empezar. Se puede revisar si Sergio lo pide.
+
+**D-10 · 2026-11-09 · vigente** (antes P-3)
+En Descubrir, cada persona ve solo perfiles con **interés mutuo** (a quien quiere conocer, y que a su vez quiere conocer a alguien de su género), **dentro de su rango de edad** y **a su distancia máxima**. Cada uno elige la edad mínima y máxima y la distancia en su perfil; por defecto, de 18 a 99 años y 50 km.
+*Por qué:* Sergio eligió la opción recomendada: es lo que la gente espera de una app de citas.
+Detalles técnicos (se pueden revisar): la edad y la distancia filtran según las preferencias de quien mira; el género, en las dos direcciones. Distancia de 2 a 200 km. Solo aparecen perfiles con ubicación y al menos 2 fotos. La regla vive en la base (`can_see_profile` y `discover_profiles`).
+
+**D-11 · 2026-11-09 · vigente** (antes P-7)
+Un **"paso" esconde el perfil 30 días**; después puede volver a aparecer. Un **"me gusta" es para siempre**: ese perfil no vuelve a salir.
+*Por qué:* Sergio eligió la opción recomendada: al empezar habrá poca gente y el mazo se vaciaría pronto; además la gente cambia de idea o de fotos. Los perfiles bloqueados no volverán nunca (cuando exista bloquear).
+
+**D-12 · 2026-11-09 · vigente**
+La ubicación se toma **del móvil, con permiso**, y se guarda **redondeada a unos 2 km**. Si la persona no da permiso, **elige su ciudad o pueblo** de una lista. A los demás solo se les muestra "a N km" (nunca menos de "a menos de 2 km").
+*Por qué:* Sergio eligió la opción recomendada: es lo que la gente espera, y al redondear nunca se guarda ni se muestra dónde está alguien exactamente (regla 3 de [privacidad-y-legal.md](privacidad-y-legal.md)).
+Detalles técnicos (se pueden revisar): la base redondea a una cuadrícula de 0,02 grados aunque la app mande una ubicación precisa. La distancia se calcula con la fórmula del haversine en SQL, **sin PostGIS**: con pocos usuarios alcanza y evita una extensión más; se puede pasar a PostGIS si crece. La lista de municipios (2.824 de España con más de 1.000 habitantes) sale de GeoNames (licencia CC BY 4.0, hay que citarla) a través del paquete `all-the-cities` 3.1.0, y está en `src/data/ciudades-es.json`.

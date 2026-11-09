@@ -1,8 +1,19 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { LocationSetter } from "@/components/LocationSetter";
+import {
+  MAX_AGE,
+  MAX_DISTANCE_KM,
+  MIN_DISTANCE_KM,
+  validatePreferences,
+  type PreferenceErrors,
+  type Preferences,
+} from "@/lib/discover";
 import {
   BIO_MAX,
+  MIN_AGE,
   GENDERS,
   INTERESTED_IN,
   MAX_PHOTOS,
@@ -24,14 +35,23 @@ export function ProfileForm({
   userId,
   initial,
   initialPhotos,
+  initialPreferences,
+  hasProfile,
+  locationUpdatedAt,
 }: {
   userId: string;
   initial: ProfileInput;
   initialPhotos: Photo[];
+  initialPreferences: Preferences;
+  hasProfile: boolean;
+  locationUpdatedAt: string | null;
 }) {
+  const router = useRouter();
   const [values, setValues] = useState<ProfileInput>(initial);
+  const [prefs, setPrefs] = useState<Preferences>(initialPreferences);
+  const [locationSaved, setLocationSaved] = useState(Boolean(locationUpdatedAt));
   const [photos, setPhotos] = useState<Photo[]>(initialPhotos);
-  const [errors, setErrors] = useState<ProfileErrors>({});
+  const [errors, setErrors] = useState<ProfileErrors & PreferenceErrors>({});
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -82,14 +102,18 @@ export function ProfileForm({
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    const found = validateProfile(values);
+    const found = { ...validateProfile(values), ...validatePreferences(prefs) };
     setErrors(found);
     if (Object.keys(found).length > 0) return;
     setBusy(true);
-    const result = await saveProfile(values);
+    const result = await saveProfile(values, prefs);
     setBusy(false);
-    if (result.ok) setMessage({ text: "Perfil guardado.", ok: true });
-    else {
+    if (result.ok) {
+      setMessage({ text: "Perfil guardado.", ok: true });
+      // La primera vez se sigue a Descubrir, que pide la ubicación.
+      if (!hasProfile) router.push("/descubrir");
+      else router.refresh();
+    } else {
       setErrors(result.errors);
       setMessage(result.message ? { text: result.message, ok: false } : null);
     }
@@ -97,7 +121,7 @@ export function ProfileForm({
 
   const input =
     "w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-lg text-zinc-900 focus:border-rose-500 focus:outline-none";
-  const fieldError = (key: keyof ProfileInput) =>
+  const fieldError = (key: keyof ProfileInput | keyof Preferences) =>
     errors[key] ? <span className="text-sm text-red-600">{errors[key]}</span> : null;
 
   return (
@@ -197,6 +221,49 @@ export function ProfileForm({
         {fieldError("interestedIn")}
       </fieldset>
 
+      <fieldset className="flex flex-col gap-3">
+        <legend className="mb-2 font-medium">Qué perfiles quieres ver</legend>
+        <div className="flex items-center gap-2">
+          <span>De</span>
+          <AgeInput value={prefs.minAge} onChange={(minAge) => setPrefs((p) => ({ ...p, minAge }))} label="Edad mínima" />
+          <span>a</span>
+          <AgeInput value={prefs.maxAge} onChange={(maxAge) => setPrefs((p) => ({ ...p, maxAge }))} label="Edad máxima" />
+          <span>años</span>
+        </div>
+        {fieldError("minAge")}
+        {fieldError("maxAge")}
+        <label className="flex flex-col gap-2">
+          <span>Hasta {prefs.maxDistanceKm} km de distancia</span>
+          <input
+            type="range"
+            min={MIN_DISTANCE_KM}
+            max={MAX_DISTANCE_KM}
+            value={prefs.maxDistanceKm}
+            onChange={(e) => setPrefs((p) => ({ ...p, maxDistanceKm: Number(e.target.value) }))}
+            className="accent-rose-600"
+          />
+        </label>
+        {fieldError("maxDistanceKm")}
+      </fieldset>
+
+      {hasProfile && (
+        <section className="flex flex-col gap-2">
+          <span className="font-medium">Tu ubicación</span>
+          <span className="text-sm text-zinc-600 dark:text-zinc-300">
+            {locationSaved
+              ? "Guardada de forma aproximada (unos 2 km). Los demás solo ven a cuántos kilómetros estás."
+              : "Todavía no la has indicado. Sin ubicación no podemos enseñarte perfiles."}
+          </span>
+          <LocationSetter
+            compact
+            onSaved={() => {
+              setLocationSaved(true);
+              setMessage({ text: "Ubicación guardada.", ok: true });
+            }}
+          />
+        </section>
+      )}
+
       <label className="flex items-start gap-3">
         <input
           type="checkbox"
@@ -233,5 +300,20 @@ function Choice(props: { name: string; value: string; label: string; checked: bo
       <input type="radio" name={props.name} value={props.value} checked={props.checked} onChange={props.onChange} className="sr-only" />
       {props.label}
     </label>
+  );
+}
+
+function AgeInput(props: { value: number; onChange: (value: number) => void; label: string }) {
+  return (
+    <input
+      type="number"
+      inputMode="numeric"
+      min={MIN_AGE}
+      max={MAX_AGE}
+      aria-label={props.label}
+      value={Number.isNaN(props.value) ? "" : props.value}
+      onChange={(e) => props.onChange(e.target.value === "" ? Number.NaN : Number(e.target.value))}
+      className="w-20 rounded-xl border border-zinc-300 bg-white px-3 py-2 text-center text-lg text-zinc-900 focus:border-rose-500 focus:outline-none"
+    />
   );
 }

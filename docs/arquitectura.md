@@ -19,10 +19,14 @@
 | `src/lib/profile.test.ts` | Pruebas de esas reglas (Vitest) |
 | `src/lib/supabase/config.ts` | Lee las variables de entorno y el nombre del bucket de fotos |
 | `src/lib/supabase/client.ts` / `server.ts` | Cliente de Supabase para el navegador y para el servidor. `getUser()` da el usuario verificado |
-| `src/proxy.ts` | Antes de cada página: renueva la sesión y manda a `/entrar` a quien entra a `/perfil` sin sesión |
+| `src/lib/discover.ts` | Reglas de Descubrir sin dependencias: rangos de edad y distancia, redondeo de la ubicación, texto de distancia y búsqueda de ciudades. Con pruebas en `discover.test.ts` |
+| `src/data/ciudades-es.json` | Municipios de España con más de 1.000 habitantes: nombre, provincia, latitud y longitud (GeoNames, CC BY 4.0; ver D-12) |
+| `src/proxy.ts` | Antes de cada página: renueva la sesión y manda a `/entrar` a quien entra a `/perfil` o `/descubrir` sin sesión |
 | `src/app/page.tsx` | Portada con "Empezar" |
-| `src/app/entrar/page.tsx` | Correo → código de 6 dígitos → sesión. Sirve para registrarse y para entrar |
-| `src/app/perfil/` | Pantalla del perfil: `page.tsx` carga datos y fotos (enlaces firmados de 1 hora), `ProfileForm.tsx` es el formulario y sube o quita fotos, `actions.ts` guarda el perfil y cierra sesión |
+| `src/app/entrar/page.tsx` | Correo → código o enlace → sesión. Sirve para registrarse y para entrar. Después lleva a `/descubrir` |
+| `src/app/descubrir/` | `page.tsx` manda al perfil si no existe, pide la ubicación si falta y si no muestra las tarjetas. `cards.ts` trae los perfiles (función `discover_profiles`) y firma sus fotos. `SwipeDeck.tsx` es el mazo (deslizar, botones, tocar para cambiar de foto). `actions.ts`: guardar ubicación, buscar ciudades, deslizar, pedir más perfiles |
+| `src/components/` | `LocationSetter.tsx` (ubicación del móvil o ciudad) y `AppNav.tsx` (barra de abajo: Descubrir y Perfil) |
+| `src/app/perfil/` | Pantalla del perfil: `page.tsx` carga datos y fotos (enlaces firmados de 1 hora), `ProfileForm.tsx` es el formulario (fotos, datos, qué perfiles quiere ver y ubicación), `actions.ts` guarda el perfil y cierra sesión |
 | `src/app/manifest.ts` | Permite añadir la web a la pantalla de inicio del móvil |
 
 ## Base de datos
@@ -33,10 +37,19 @@ Migración `20261109000000_perfiles.sql`:
 - `profile_photos`: ruta del archivo y orden. La ruta tiene que empezar con la carpeta del dueño.
 - Bucket privado `profile-photos`: archivos en `<id del usuario>/<uuid>.<ext>`.
 - Triggers: edad mínima 18 (y máxima 120) y máximo 6 fotos.
-- RLS: cada usuario solo ve y cambia su perfil, sus fotos y sus archivos. Todavía **nadie** puede ver perfiles ajenos: eso llega con "Descubrir".
+- RLS: cada usuario solo ve y cambia su perfil, sus fotos y sus archivos.
 - Al borrar un usuario de `auth.users`, se borran su perfil y sus filas de fotos (los archivos del bucket no; ver P-11 en [pendientes.md](pendientes.md)).
 
 **[Verificado 2026-11-09]** la migración se aplicó en un PostgreSQL 16 local con esquemas `auth` y `storage` simulados, y se comprobó: rechaza menores de 18, perfiles ajenos, una séptima foto, rutas de otra carpeta y archivos en la carpeta de otro, y otro usuario no ve ningún dato. Falta probarla en un proyecto real de Supabase.
+
+Migración `20261109010000_descubrir.sql` (D-10, D-11, D-12):
+
+- `profiles` suma `min_age`, `max_age`, `max_distance_km`, `lat`, `lon` y `location_updated_at`. Un trigger redondea la ubicación a 0,02 grados (unos 2 km) siempre.
+- `can_see_profile(id)`: si la persona con sesión puede ver ese perfil (interés mutuo, edad, distancia, ubicación y 2 fotos). Con ella, RLS deja ver **las fotos y archivos** de esos perfiles. Las filas de `profiles` ajenas siguen sin poder leerse.
+- `discover_profiles(n)`: hasta 20 perfiles visibles, del más cercano al más lejano, sin los que ya tienen "me gusta" ni "paso" de hace menos de 30 días. Devuelve solo nombre, edad, descripción, km enteros y rutas de fotos.
+- `swipes`: un "me gusta" o "paso" por pareja. Solo se escribe con la función `swipe()`, que comprueba que el perfil sea visible y no pisa un "me gusta".
+
+**[Verificado 2026-11-09]** en un PostgreSQL 16 local con `auth` y `storage` simulados: redondeo de la ubicación; filtros de género en las dos direcciones, edad, distancia y mínimo de fotos; "paso" que vuelve a los 30 días; "me gusta" que no se pisa; no se puede deslizar un perfil no visible ni escribir directo en `swipes`; las fotos ajenas solo se ven si el perfil es visible; un usuario sin sesión no puede llamar a las funciones.
 
 ## Reglas de arquitectura
 
