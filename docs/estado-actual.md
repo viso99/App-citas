@@ -21,4 +21,4 @@ Qué hay **realmente** en el repo. No es lo que el producto debe hacer: eso est�
 - Las fotos no se pueden reordenar: quedan en el orden en que se subieron.
 - Todavía no se avisa de las coincidencias: los "me gusta" mutuos se guardan y se usarán en la parte 3.
 - No se puede deshacer un "paso" ni un "me gusta".
-- Los correos con código usan el envío de prueba de Supabase, con un límite muy bajo por hora.
+- Los correos de acceso usan el envío de prueba de Supabase, con un límite muy bajo: **[Verificado 2026-11-09]** al pasarlo, Supabase responde 429 `over_email_send_rate_limit` y la app pide esperar un rato. Hace falta un servicio de correo propio antes de abrir a más gente (ver [desarrollo.md](desarrollo.md)).
