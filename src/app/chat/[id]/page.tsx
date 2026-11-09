@@ -5,6 +5,7 @@ import { isUuid, pairOf } from "@/lib/chat";
 import { PHOTOS_BUCKET } from "@/lib/supabase/config";
 import { getUser } from "@/lib/supabase/server";
 import { ChatRoom, type Message } from "./ChatRoom";
+import { ChatSafety } from "./ChatSafety";
 
 export default function ChatPage(props: PageProps<"/chat/[id]">) {
   return (
@@ -53,6 +54,7 @@ async function Chat({ params }: { params: Promise<{ id: string }> }) {
           <img src={signed.data.signedUrl} alt="" className="h-10 w-10 rounded-full object-cover" />
         )}
         <h1 className="text-lg font-semibold">{other.first_name}</h1>
+        <ChatSafety targetId={other.id} name={other.first_name} />
       </header>
       <ChatRoom me={user.id} userA={userA} userB={userB} otherName={other.first_name} initialMessages={messages} />
     </div>

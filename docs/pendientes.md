@@ -17,7 +17,7 @@ Están más o menos en el orden en que se van a necesitar. P-2 (qué lleva el pe
 |---|---|---|
 | P-1 | **Nombre y marca** de la app (también el dominio web). | Antes de diseñar pantallas o publicar |
 | P-4 | **Cómo se verifica la mayoría de edad:** solo fecha de nacimiento declarada, o algo más fuerte (foto de verificación, documento). | Antes de abrir a usuarios reales |
-| P-5 | **Qué pasa al denunciar:** quién revisa las denuncias, en qué plazo y qué se hace (ocultar, suspender). | Antes de abrir a usuarios reales |
+| P-5 | **En qué plazo se revisan las denuncias** y qué se hace con un perfil denunciado de verdad (suspender, borrar). Qué pasa al denunciar ya está en D-14. | Antes de abrir a usuarios reales |
 | P-8 | **Modelo de negocio:** gratis, suscripción, pagos por funciones. Fuera de la primera versión, pero afecta el diseño a futuro. | Después de la primera versión |
 | P-9 | **Revisión legal profesional**, política de privacidad y condiciones de uso ([privacidad-y-legal.md](privacidad-y-legal.md)). | Antes de abrir a usuarios fuera del círculo de prueba |
 | P-11 | **Borrar la cuenta desde la app** (con sus fotos): falta hacerlo. Es técnico, pero conviene tenerlo antes de abrir a usuarios reales. | Antes de abrir a usuarios reales |

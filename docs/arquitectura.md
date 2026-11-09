@@ -72,6 +72,15 @@ Migración `20261109030000_chat.sql`:
 
 **[Verificado 2026-11-09]** en el PostgreSQL local: escribir y leer entre la pareja; no se puede escribir en nombre del otro, sin coincidencia, en un chat ajeno ni un mensaje vacío; un tercero no ve mensajes; borrar la coincidencia borra los mensajes.
 
+Migración `20261109040000_bloquear_denunciar.sql` (D-14):
+
+- `blocks`: quién bloqueó a quién. Cada uno ve solo a quién bloqueó; nadie escribe directamente.
+- `reports`: denuncias con motivo (`report_reason`), texto opcional de hasta 500 caracteres y `reviewed_at`, que completa quien revisa. Una por persona y perfil. RLS sin políticas: la app no las lee ni las escribe directamente.
+- `can_see_profile()` excluye los bloqueos en las dos direcciones y los perfiles con 3 o más denuncias sin revisar de personas distintas. Las coincidencias existentes se siguen viendo.
+- `block_user()` y `report_user()`: comprueban que se puede ver el perfil, guardan el bloqueo con el mismo candado por pareja que `swipe()` y borran la coincidencia (y el chat). `report_user()` además guarda la denuncia.
+
+**[Verificado 2026-11-09]** en el PostgreSQL local: bloquear borra coincidencia y mensajes y repetirlo no falla; ninguno de los dos se ve en Descubrir ni ve las fotos del otro; quien fue bloqueado no ve el bloqueo ni puede deslizar; con 2 denuncias el perfil se sigue viendo y con 3 se oculta, y vuelve al marcarlas revisadas; repetir una denuncia no suma; nadie lee denuncias desde la app; motivos inválidos y textos largos se rechazan; sin sesión no se puede llamar.
+
 ## Reglas de arquitectura
 
 1. Las reglas críticas van **en la base** (RLS, triggers, CHECK) además de en la app. La app ayuda con mensajes claros; la base es la que protege.

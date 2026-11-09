@@ -36,6 +36,13 @@ npm run build
 
 La CI de GitHub (`.github/workflows/ci.yml`) corre lint, typecheck, pruebas y build en cada PR.
 
+## Revisar denuncias (D-14)
+
+En Supabase, **Table Editor → `reports`**: cada fila es una denuncia con quién denuncia (`reporter_id`), a quién (`reported_id`), el motivo y el texto. Las que tienen `reviewed_at` vacío están sin revisar. Un perfil con 3 o más sin revisar está oculto de Descubrir.
+
+- Para dar por revisada una denuncia, completá `reviewed_at` con la fecha y hora actual. Si el perfil estaba oculto y quedan menos de 3 sin revisar, vuelve a aparecer.
+- Los bloqueos están en `blocks`. Qué hacer con un perfil denunciado de verdad todavía no está decidido (P-5).
+
 ## Avisos para quien programe
 
 - **Next.js 16:** cambió respecto de versiones anteriores. Leé `AGENTS.md` y la guía en `node_modules/next/dist/docs/` antes de escribir código de Next. Por ejemplo: el "middleware" ahora se llama `src/proxy.ts`, y con `cacheComponents` todo lo que lee la sesión tiene que estar dentro de un `<Suspense>`.
