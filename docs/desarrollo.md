@@ -9,7 +9,8 @@
 
 1. Crear el proyecto en [supabase.com](https://supabase.com) eligiendo una región de la UE (por ejemplo, Frankfurt).
 2. **Base de datos:** en SQL Editor, ejecutar en orden los archivos de `supabase/migrations/`. (Con la CLI de Supabase: `supabase link` y `supabase db push`.)
-3. **Correo con código (D-7):** en Authentication → Email Templates → "Magic Link", el texto tiene que incluir `{{ .Token }}` (el código de 6 dígitos), por ejemplo: `Tu código para entrar es {{ .Token }}`. Si no, Supabase manda un enlace en vez del código.
+3. **Correo de acceso (D-7):** **[Verificado 2026-11-09]** sin un servicio de correo propio (SMTP), Supabase no deja editar las plantillas y manda solo un **enlace**. La app acepta las dos cosas: el enlace lleva a `/auth/confirmar`, que inicia la sesión (hay que abrirlo en el mismo navegador donde se pidió). Cuando haya SMTP, en Authentication → Emails → "Magic link or OTP" agregar `{{ .Token }}` a la plantilla para que llegue también el código.
+   En Authentication → URL Configuration, el **Site URL** y las **Redirect URLs** tienen que incluir la dirección donde está publicada la app (y `http://localhost:3000/**` para desarrollo).
 4. **Correos reales:** el envío de correos incluido en Supabase es solo para pruebas y tiene un límite muy bajo por hora. Antes de abrir a más gente hace falta un servicio de correo propio (SMTP), que puede tener costo: lo decide Sergio.
 5. Copiar `.env.example` a `.env.local` y completar la URL y la clave "publishable" (Project Settings → API).
 
