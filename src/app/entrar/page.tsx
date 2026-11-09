@@ -35,7 +35,12 @@ function EnterForm() {
     });
     setBusy(false);
     if (error) {
-      setError("No pudimos enviar el correo. Revisa el correo e inténtalo de nuevo.");
+      // Supabase limita cuántos correos se mandan por hora (docs/desarrollo.md).
+      setError(
+        error.status === 429 || error.code === "over_email_send_rate_limit"
+          ? "Se han enviado demasiados correos seguidos. Espera un rato e inténtalo de nuevo."
+          : "No pudimos enviar el correo. Revisa la dirección e inténtalo de nuevo.",
+      );
       return;
     }
     setStep("code");
