@@ -8,7 +8,7 @@ Qué hay **realmente** en el repo. No es lo que el producto debe hacer: eso est�
 
 | Parte (de [producto.md](producto.md)) | Estado |
 |---|---|
-| 1. Registro y perfil | **Hecho y probado por Sergio en el celular.** Registro y entrada con correo (por ahora llega un enlace; el código llega cuando haya servicio de correo propio). Perfil con nombre, fecha de nacimiento (18+), descripción opcional, género, a quién quiere conocer, consentimiento y de 2 a 6 fotos privadas |
+| 1. Registro y perfil | **Hecho y probado por Sergio en el celular.** Registro y entrada con correo (por ahora llega un enlace, que hay que abrir en el mismo navegador; la pantalla ya no pide código. El código llegará cuando haya servicio de correo propio). Perfil con nombre, fecha de nacimiento (18+), descripción opcional, género, a quién quiere conocer, consentimiento y de 2 a 6 fotos privadas |
 | 2. Descubrir y deslizar | **Publicado, sin probar con gente real.** Ubicación aproximada (móvil o ciudad), preferencias de edad y distancia, tarjetas con fotos, deslizar o botones de "me gusta" y "paso" |
 | 3. Coincidencias | **Publicado, sin probar con gente real.** Un "me gusta" mutuo crea la coincidencia: aviso "¡Es una coincidencia!" en Descubrir y pantalla `/coincidencias` con la lista (foto, nombre, edad y fecha). Todavía no se puede deshacer una coincidencia |
 | 4. Chat | **Hecho en código (rama `claude/chat`), sin probar con gente real.** Desde la lista de coincidencias se abre `/chat/<id>`: mensajes de texto (hasta 1.000 caracteres) que llegan en tiempo real, con la hora. La lista muestra el último mensaje y se ordena por actividad. Sin fotos, sin avisos de mensaje nuevo fuera de la app y sin "leído" |

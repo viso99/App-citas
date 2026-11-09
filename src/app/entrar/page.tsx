@@ -1,13 +1,13 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-// Registro e inicio de sesión con correo y código (D-7): la misma pantalla sirve para las
-// dos cosas. Si el correo no tiene cuenta, Supabase la crea al verificar el código.
-// Mientras no haya un servicio de correo propio, el correo trae un enlace en vez del código:
-// el enlace lleva a /auth/confirmar, que inicia la sesión.
+// Registro e inicio de sesión con correo (D-7): la misma pantalla sirve para las dos cosas.
+// Si el correo no tiene cuenta, Supabase la crea. Mientras no haya un servicio de correo
+// propio, el correo trae un enlace (no un código): lleva a /auth/confirmar, que inicia la
+// sesión. Tiene que abrirse en el mismo navegador porque el enlace se valida con una cookie.
 export default function EnterPage() {
   return (
     <Suspense>
@@ -17,11 +17,9 @@ export default function EnterPage() {
 }
 
 function EnterForm() {
-  const router = useRouter();
   const linkFailed = useSearchParams().get("error") === "enlace";
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [step, setStep] = useState<"email" | "code">("email");
+  const [step, setStep] = useState<"email" | "sent">("email");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,21 +41,7 @@ function EnterForm() {
       );
       return;
     }
-    setStep("code");
-  }
-
-  async function verifyCode(event: React.FormEvent) {
-    event.preventDefault();
-    setBusy(true);
-    setError(null);
-    const { error } = await createClient().auth.verifyOtp({ email: email.trim(), token: code.trim(), type: "email" });
-    setBusy(false);
-    if (error) {
-      setError("El código no es correcto o ha caducado.");
-      return;
-    }
-    router.replace("/descubrir");
-    router.refresh();
+    setStep("sent");
   }
 
   const input =
@@ -86,30 +70,18 @@ function EnterForm() {
           </button>
         </form>
       ) : (
-        <form onSubmit={verifyCode} className="flex flex-col gap-4">
-          <p className="text-zinc-600 dark:text-zinc-300">
-            Te hemos enviado un correo a <strong>{email}</strong>. Abre el enlace en este mismo navegador, o
-            escribe aquí el código si te ha llegado uno.
+        <div className="flex flex-col gap-4">
+          <p className="text-lg">
+            Te hemos enviado un correo a <strong>{email}</strong>.
           </p>
-          <label className="flex flex-col gap-2">
-            <span className="text-zinc-600 dark:text-zinc-300">Código</span>
-            <input
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              required
-              pattern="[0-9]{6,10}"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className={`${input} tracking-widest`}
-            />
-          </label>
-          <button type="submit" disabled={busy} className={button}>
-            {busy ? "Comprobando…" : "Entrar"}
-          </button>
+          <p className="text-zinc-600 dark:text-zinc-300">
+            Ábrelo y toca el enlace para entrar. Hazlo en este mismo navegador: si se abre en otro, no podrás entrar.
+          </p>
+          <p className="text-sm text-zinc-500">Si no lo ves en unos minutos, mira en la carpeta de spam.</p>
           <button type="button" onClick={() => setStep("email")} className="text-zinc-500 underline">
             Usar otro correo
           </button>
-        </form>
+        </div>
       )}
       {linkFailed && !error && step === "email" && (
         <p className="text-red-600">El enlace no es válido o ha caducado. Pide uno nuevo.</p>
