@@ -1,13 +1,24 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 // Registro e inicio de sesión con correo y código (D-7): la misma pantalla sirve para las
 // dos cosas. Si el correo no tiene cuenta, Supabase la crea al verificar el código.
+// Mientras no haya un servicio de correo propio, el correo trae un enlace en vez del código:
+// el enlace lleva a /auth/confirmar, que inicia la sesión.
 export default function EnterPage() {
+  return (
+    <Suspense>
+      <EnterForm />
+    </Suspense>
+  );
+}
+
+function EnterForm() {
   const router = useRouter();
+  const linkFailed = useSearchParams().get("error") === "enlace";
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"email" | "code">("email");
@@ -18,10 +29,13 @@ export default function EnterPage() {
     event.preventDefault();
     setBusy(true);
     setError(null);
-    const { error } = await createClient().auth.signInWithOtp({ email: email.trim() });
+    const { error } = await createClient().auth.signInWithOtp({
+      email: email.trim(),
+      options: { emailRedirectTo: `${window.location.origin}/auth/confirmar` },
+    });
     setBusy(false);
     if (error) {
-      setError("No pudimos enviar el código. Revisa el correo e inténtalo de nuevo.");
+      setError("No pudimos enviar el correo. Revisa el correo e inténtalo de nuevo.");
       return;
     }
     setStep("code");
@@ -63,13 +77,14 @@ export default function EnterPage() {
             />
           </label>
           <button type="submit" disabled={busy} className={button}>
-            {busy ? "Enviando…" : "Enviarme un código"}
+            {busy ? "Enviando…" : "Continuar"}
           </button>
         </form>
       ) : (
         <form onSubmit={verifyCode} className="flex flex-col gap-4">
           <p className="text-zinc-600 dark:text-zinc-300">
-            Te hemos enviado un código a <strong>{email}</strong>.
+            Te hemos enviado un correo a <strong>{email}</strong>. Abre el enlace en este mismo navegador, o
+            escribe aquí el código si te ha llegado uno.
           </p>
           <label className="flex flex-col gap-2">
             <span className="text-zinc-600 dark:text-zinc-300">Código</span>
@@ -90,6 +105,9 @@ export default function EnterPage() {
             Usar otro correo
           </button>
         </form>
+      )}
+      {linkFailed && !error && step === "email" && (
+        <p className="text-red-600">El enlace no es válido o ha caducado. Pide uno nuevo.</p>
       )}
       {error && <p className="text-red-600">{error}</p>}
     </main>

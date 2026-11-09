@@ -2,13 +2,13 @@
 
 Qué hay **realmente** en el repo. No es lo que el producto debe hacer: eso está en [producto.md](producto.md). Cómo está organizado el código: [arquitectura.md](arquitectura.md).
 
-**[Verificado 2026-11-09]** en la rama `claude/registro-perfil`: lint, typecheck, 12 pruebas y build pasan. **No se probó todavía contra un proyecto real de Supabase** (no existe aún, ver [desarrollo.md](desarrollo.md)), así que registro, fotos y guardado no se vieron funcionar de punta a punta.
+**[Verificado 2026-11-09]** en la rama `claude/entrar-con-enlace`: lint, typecheck, 12 pruebas y build pasan. **[Verificado 2026-11-09]** el proyecto de Supabase `app-citas` existe (región eu-west-1, Irlanda) y tiene aplicada la migración `20261109000000_perfiles.sql` (8 políticas en las tablas, 3 en el almacenamiento, bucket privado). Registro, fotos y guardado todavía no se vieron funcionar de punta a punta.
 
 ## Primera versión: qué está hecho
 
 | Parte (de [producto.md](producto.md)) | Estado |
 |---|---|
-| 1. Registro y perfil | **Hecho en código, sin probar con Supabase real.** Registro y entrada con correo y código. Perfil con nombre, fecha de nacimiento (18+), descripción opcional, género, a quién quiere conocer, consentimiento y de 2 a 6 fotos privadas |
+| 1. Registro y perfil | **Hecho en código, sin probar de punta a punta.** Registro y entrada con correo (por ahora llega un enlace; el código llega cuando haya servicio de correo propio). Perfil con nombre, fecha de nacimiento (18+), descripción opcional, género, a quién quiere conocer, consentimiento y de 2 a 6 fotos privadas |
 | 2. Descubrir y deslizar | No empezado |
 | 3. Coincidencias | No empezado |
 | 4. Chat | No empezado |
