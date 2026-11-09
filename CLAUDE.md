@@ -4,7 +4,7 @@ Leé este archivo entero al empezar cada sesión. Es corto a propósito: dice qu
 
 ## Qué es este proyecto (en 30 segundos)
 
-- **Producto [Confirmado 2026-11-09]:** una app de citas al estilo de Tinder (ver perfiles, deslizar, coincidir y chatear), con **nombre, marca y diseño propios**. Es un **producto real** para lanzar con usuarios, empezando en **España**. Detalle en [docs/producto.md](docs/producto.md).
+- **Producto [Confirmado 2026-11-09]:** una app de citas al estilo de Tinder (ver perfiles, deslizar, coincidir y chatear), con **nombre, marca y diseño propios**. Se llama **Zuvi** (D-15). Es un **producto real** para lanzar con usuarios, empezando en **España**. Detalle en [docs/producto.md](docs/producto.md).
 - **Plataforma [Confirmado 2026-11-09]:** **web pensada para el celular**, que se abre en el navegador y se puede agregar a la pantalla de inicio. Las apps de las tiendas quedan para después.
 - **Primera versión [Confirmado 2026-11-09]:** registro de mayores de 18 y perfil con fotos, ver gente cercana y deslizar, coincidencia mutua, chat entre quienes coincidieron, y bloquear y denunciar. Nada más.
 - **Tecnología (D-6):** Next.js 16 con TypeScript y Supabase (en la UE). **Next.js 16 cambió mucho:** leé `AGENTS.md` antes de escribir código de Next.

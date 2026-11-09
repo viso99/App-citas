@@ -14,7 +14,7 @@
 
 | Archivo | Qué hace |
 |---|---|
-| `src/config/app.ts` | Nombre (provisional) y descripción de la app. Único lugar donde está el nombre |
+| `src/config/app.ts` | Nombre (Zuvi, D-15) y descripción de la app. Único lugar donde está el nombre |
 | `src/lib/profile.ts` | Reglas del perfil sin dependencias: edad mínima, largos, opciones de género, fotos (2 a 6, JPG/PNG/WebP, 5 MB). Lo usan pantallas, servidor y pruebas |
 | `src/lib/profile.test.ts` | Pruebas de esas reglas (Vitest) |
 | `src/lib/supabase/config.ts` | Lee las variables de entorno y el nombre del bucket de fotos |
