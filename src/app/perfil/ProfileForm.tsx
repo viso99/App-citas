@@ -175,7 +175,12 @@ export function ProfileForm({
 
       <label className="flex flex-col gap-2">
         <span className="font-medium">Fecha de nacimiento</span>
-        <input type="date" value={values.birthDate} onChange={(e) => set("birthDate", e.target.value)} className={input} />
+        <input
+          type="date"
+          value={values.birthDate}
+          onChange={(e) => set("birthDate", e.target.value)}
+          className={input}
+        />
         {fieldError("birthDate")}
       </label>
 
@@ -198,7 +203,14 @@ export function ProfileForm({
         <legend className="mb-2 font-medium">Soy</legend>
         <div className="flex flex-wrap gap-2">
           {Object.entries(GENDERS).map(([key, label]) => (
-            <Choice key={key} name="gender" value={key} label={label} checked={values.gender === key} onChange={() => set("gender", key)} />
+            <Choice
+              key={key}
+              name="gender"
+              value={key}
+              label={label}
+              checked={values.gender === key}
+              onChange={() => set("gender", key)}
+            />
           ))}
         </div>
         {fieldError("gender")}
@@ -225,9 +237,17 @@ export function ProfileForm({
         <legend className="mb-2 font-medium">Qué perfiles quieres ver</legend>
         <div className="flex items-center gap-2">
           <span>De</span>
-          <AgeInput value={prefs.minAge} onChange={(minAge) => setPrefs((p) => ({ ...p, minAge }))} label="Edad mínima" />
+          <AgeInput
+            value={prefs.minAge}
+            onChange={(minAge) => setPrefs((p) => ({ ...p, minAge }))}
+            label="Edad mínima"
+          />
           <span>a</span>
-          <AgeInput value={prefs.maxAge} onChange={(maxAge) => setPrefs((p) => ({ ...p, maxAge }))} label="Edad máxima" />
+          <AgeInput
+            value={prefs.maxAge}
+            onChange={(maxAge) => setPrefs((p) => ({ ...p, maxAge }))}
+            label="Edad máxima"
+          />
           <span>años</span>
         </div>
         {fieldError("minAge")}
@@ -297,7 +317,14 @@ function Choice(props: { name: string; value: string; label: string; checked: bo
         props.checked ? "border-rose-600 bg-rose-600 text-white" : "border-zinc-300"
       }`}
     >
-      <input type="radio" name={props.name} value={props.value} checked={props.checked} onChange={props.onChange} className="sr-only" />
+      <input
+        type="radio"
+        name={props.name}
+        value={props.value}
+        checked={props.checked}
+        onChange={props.onChange}
+        className="sr-only"
+      />
       {props.label}
     </label>
   );

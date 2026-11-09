@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { validatePreferences, type PreferenceErrors, type Preferences } from "@/lib/discover";
 import { photoCountError, validateProfile, type ProfileErrors, type ProfileInput } from "@/lib/profile";
+import { PHOTOS_BUCKET } from "@/lib/supabase/config";
 import { getUser } from "@/lib/supabase/server";
 
 export type SaveResult = { ok: true } | { ok: false; errors: ProfileErrors & PreferenceErrors; message?: string };
@@ -49,4 +50,25 @@ export async function signOut() {
   const { supabase } = await getUser();
   await supabase.auth.signOut();
   redirect("/");
+}
+
+// Borra la cuenta y todos sus datos (regla 6 de docs/privacidad-y-legal.md). Primero los
+// archivos de fotos (Supabase no deja borrarlos desde SQL) y después el usuario, que borra
+// en cascada perfil, coincidencias, mensajes, bloqueos y denuncias.
+export async function deleteAccount(): Promise<{ ok: false }> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/entrar");
+
+  const bucket = supabase.storage.from(PHOTOS_BUCKET);
+  const { data: files, error: listError } = await bucket.list(user.id, { limit: 1000 });
+  if (listError) return { ok: false };
+  if (files.length > 0) {
+    const { error } = await bucket.remove(files.map((f) => `${user.id}/${f.name}`));
+    if (error) return { ok: false };
+  }
+
+  const { error } = await supabase.rpc("delete_my_account");
+  if (error) return { ok: false };
+  await supabase.auth.signOut({ scope: "local" });
+  redirect("/cuenta-eliminada");
 }
