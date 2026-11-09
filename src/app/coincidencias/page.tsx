@@ -19,7 +19,15 @@ export default function MatchesPage() {
   );
 }
 
-type Row = { id: string; first_name: string; age: number; photo_path: string | null; matched_at: string };
+type Row = {
+  id: string;
+  first_name: string;
+  age: number;
+  photo_path: string | null;
+  matched_at: string;
+  last_message: string | null;
+  last_message_mine: boolean | null;
+};
 
 const dateFormat = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "long", timeZone: "Europe/Madrid" });
 
@@ -58,17 +66,26 @@ async function Matches() {
       {rows.map((r) => {
         const url = r.photo_path ? urls.get(r.photo_path) : undefined;
         return (
-          <li key={r.id} className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-200">
-            {url && (
-              // eslint-disable-next-line @next/next/no-img-element -- enlaces firmados y temporales
-              <img src={url} alt="" className="h-full w-full object-cover" />
-            )}
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-10 text-white">
-              <p className="font-semibold">
-                {r.first_name}, {r.age}
-              </p>
-              <p className="text-xs text-white/80">Desde el {dateFormat.format(new Date(r.matched_at))}</p>
-            </div>
+          <li key={r.id}>
+            <Link
+              href={`/chat/${r.id}`}
+              className="relative block aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-200"
+            >
+              {url && (
+                // eslint-disable-next-line @next/next/no-img-element -- enlaces firmados y temporales
+                <img src={url} alt="" className="h-full w-full object-cover" />
+              )}
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-10 text-white">
+                <p className="font-semibold">
+                  {r.first_name}, {r.age}
+                </p>
+                <p className="truncate text-xs text-white/80">
+                  {r.last_message
+                    ? `${r.last_message_mine ? "Tú: " : ""}${r.last_message}`
+                    : `Desde el ${dateFormat.format(new Date(r.matched_at))} · Escríbele`}
+                </p>
+              </div>
+            </Link>
           </li>
         );
       })}
