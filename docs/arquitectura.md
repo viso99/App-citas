@@ -41,7 +41,7 @@ Migración `20261109000000_perfiles.sql`:
 - Bucket privado `profile-photos`: archivos en `<id del usuario>/<uuid>.<ext>`.
 - Triggers: edad mínima 18 (y máxima 120) y máximo 6 fotos.
 - RLS: cada usuario solo ve y cambia su perfil, sus fotos y sus archivos.
-- Al borrar un usuario de `auth.users`, se borran su perfil y sus filas de fotos (los archivos del bucket no; ver P-11 en [pendientes.md](pendientes.md)).
+- Al borrar un usuario de `auth.users`, se borran en cascada su perfil, sus filas de fotos y todo lo que lo nombra. Los archivos del bucket no: los borra la app antes (ver la migración de borrar la cuenta).
 
 **[Verificado 2026-11-09]** la migración se aplicó en un PostgreSQL 16 local con esquemas `auth` y `storage` simulados, y se comprobó: rechaza menores de 18, perfiles ajenos, una séptima foto, rutas de otra carpeta y archivos en la carpeta de otro, y otro usuario no ve ningún dato. Falta probarla en un proyecto real de Supabase.
 
@@ -80,6 +80,13 @@ Migración `20261109040000_bloquear_denunciar.sql` (D-14):
 - `block_user()` y `report_user()`: comprueban que se puede ver el perfil, guardan el bloqueo con el mismo candado por pareja que `swipe()` y borran la coincidencia (y el chat). `report_user()` además guarda la denuncia.
 
 **[Verificado 2026-11-09]** en el PostgreSQL local: bloquear borra coincidencia y mensajes y repetirlo no falla; ninguno de los dos se ve en Descubrir ni ve las fotos del otro; quien fue bloqueado no ve el bloqueo ni puede deslizar; con 2 denuncias el perfil se sigue viendo y con 3 se oculta, y vuelve al marcarlas revisadas; repetir una denuncia no suma; nadie lee denuncias desde la app; motivos inválidos y textos largos se rechazan; sin sesión no se puede llamar.
+
+Migración `20261109050000_borrar_cuenta.sql`:
+
+- `delete_my_account()`: borra de `auth.users` al usuario con sesión, y con él en cascada su perfil, fotos, deslizamientos, coincidencias y mensajes, bloqueos y denuncias.
+- La acción `deleteAccount` (`src/app/perfil/actions.ts`) primero borra los archivos de su carpeta con la API de almacenamiento (Supabase no deja borrarlos desde SQL), después llama a la función y cierra la sesión.
+
+**[Verificado 2026-11-09]** en el PostgreSQL local: borra todo lo de esa persona y nada de las demás; sin sesión no se puede llamar.
 
 ## Reglas de arquitectura
 
