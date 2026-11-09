@@ -25,7 +25,9 @@
 | `src/app/page.tsx` | Portada con "Empezar" |
 | `src/app/entrar/page.tsx` | Correo → código o enlace → sesión. Sirve para registrarse y para entrar. Después lleva a `/descubrir` |
 | `src/app/descubrir/` | `page.tsx` manda al perfil si no existe, pide la ubicación si falta y si no muestra las tarjetas. `cards.ts` trae los perfiles (función `discover_profiles`) y firma sus fotos. `SwipeDeck.tsx` es el mazo (deslizar, botones, tocar para cambiar de foto). `actions.ts`: guardar ubicación, buscar ciudades, deslizar (dice si hubo coincidencia), pedir más perfiles |
-| `src/app/coincidencias/page.tsx` | Lista de coincidencias (función `my_matches`) con la primera foto firmada |
+| `src/app/coincidencias/page.tsx` | Lista de coincidencias (función `my_matches`) con la primera foto firmada y el último mensaje; cada una abre su chat |
+| `src/app/chat/[id]/` | `page.tsx` comprueba que haya coincidencia y carga los últimos 200 mensajes; `ChatRoom.tsx` los muestra, envía (insert directo, protegido por RLS) y recibe los nuevos con Supabase Realtime |
+| `src/lib/chat.ts` | Reglas del chat sin dependencias: largo máximo, orden de la pareja (`pairOf`). Pruebas en `chat.test.ts` |
 | `src/components/` | `LocationSetter.tsx` (ubicación del móvil o ciudad) y `AppNav.tsx` (barra de abajo: Descubrir, Coincidencias y Perfil) |
 | `src/app/perfil/` | Pantalla del perfil: `page.tsx` carga datos y fotos (enlaces firmados de 1 hora), `ProfileForm.tsx` es el formulario (fotos, datos, qué perfiles quiere ver y ubicación), `actions.ts` guarda el perfil y cierra sesión |
 | `src/app/manifest.ts` | Permite añadir la web a la pantalla de inicio del móvil |
@@ -60,6 +62,15 @@ Migración `20261109020000_coincidencias.sql`:
 - `my_matches()`: las coincidencias propias con nombre, edad, primera foto y fecha.
 
 **[Verificado 2026-11-09]** en el mismo PostgreSQL local: un "me gusta" sin respuesta no crea coincidencia; un "paso" tampoco; el segundo "me gusta" sí, una sola fila; las dos personas la ven en `my_matches`; las fotos se siguen viendo tras cambiar preferencias; un tercero no ve coincidencias ajenas ni puede crearlas; sin sesión no se puede llamar.
+
+Migración `20261109030000_chat.sql`:
+
+- `messages`: pertenece a una coincidencia (clave `user_a`, `user_b` hacia `matches`, se borra con ella). Texto de 1 a 1.000 caracteres.
+- RLS: leen las dos personas de la coincidencia; escribe solo una de ellas, en nombre propio y si la coincidencia existe.
+- Se agrega a la publicación `supabase_realtime` para recibir mensajes en tiempo real (Realtime respeta RLS).
+- `my_matches()` suma el último mensaje y ordena por actividad.
+
+**[Verificado 2026-11-09]** en el PostgreSQL local: escribir y leer entre la pareja; no se puede escribir en nombre del otro, sin coincidencia, en un chat ajeno ni un mensaje vacío; un tercero no ve mensajes; borrar la coincidencia borra los mensajes.
 
 ## Reglas de arquitectura
 
