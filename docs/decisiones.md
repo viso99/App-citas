@@ -34,3 +34,13 @@ Tecnología de partida:
 
 *Por qué:* cubre con pocas piezas lo que pide la primera versión (cuentas, fotos, cercanía, chat en tiempo real) y es muy usado y documentado. Alojar los datos en la UE simplifica el RGPD ([privacidad-y-legal.md](privacidad-y-legal.md)). Next.js deja abierta la puerta a una app de tiendas más adelante (por ejemplo, con React Native) reutilizando lógica. Se arranca con los planes gratuitos: **pasar a un plan pago lo decide Sergio** (D-5).
 *Estado:* todavía no se instaló nada ([estado-actual.md](estado-actual.md)). Si al empezar el código aparece una razón fuerte para cambiar algo, se registra como decisión nueva y se le avisa a Sergio.
+
+**D-7 · 2026-11-09 · vigente**
+La gente se registra y entra **con su correo, recibiendo un código** para confirmarlo. Sin contraseña.
+*Por qué:* Sergio eligió la opción recomendada: es gratis y funciona para todos. Google y Apple pueden sumarse después como atajo, y el teléfono (SMS, con costo) cuando haya más usuarios.
+Detalles técnicos (se pueden revisar): Supabase Auth con código de un solo uso (`signInWithOtp` + `verifyOtp`); la misma pantalla `/entrar` sirve para registrarse y para entrar.
+
+**D-8 · 2026-11-09 · vigente**
+El perfil lleva solo: **nombre de pila, fecha de nacimiento** (para mostrar la edad y frenar a menores), **de 2 a 6 fotos**, **descripción corta opcional**, **género** y **a quién quiere conocer** (hombres, mujeres o todos).
+*Por qué:* Sergio aprobó el mínimo propuesto: cada dato extra es más que proteger por el RGPD y más pasos antes de usar la app. Intereses, altura, trabajo, etc. se suman si los usuarios lo piden.
+Detalles técnicos (se pueden revisar): nombre de 1 a 40 caracteres, descripción hasta 500, fotos JPG, PNG o WebP de hasta 5 MB en almacenamiento privado. Antes de guardar género y preferencia se pide consentimiento explícito (RGPD art. 9) y se guarda cuándo se dio. Las reglas críticas también están en la base de datos ([arquitectura.md](arquitectura.md)).

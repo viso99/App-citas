@@ -30,4 +30,6 @@ Tiene **nombre, marca y diseño propios**. "Como Tinder" describe el tipo de app
 
 **[Confirmado 2026-11-09]** Fuera de la primera versión: pagos y suscripciones, "superlikes", videollamadas y cualquier otra función. Se suman después según lo que digan los usuarios, y solo con el visto bueno de Sergio.
 
-Los detalles de cada punto (qué datos lleva el perfil, cuántas fotos, a qué distancia, a quién se le muestra cada perfil, cómo se verifica la edad, qué pasa al bloquear o denunciar) **no están definidos**. Están en [pendientes.md](pendientes.md). No los inventes: preguntale a Sergio o registralos como supuesto.
+**[Confirmado 2026-11-09]** Registro con correo y código (D-7). El perfil lleva nombre de pila, fecha de nacimiento, de 2 a 6 fotos, descripción corta opcional, género y a quién quiere conocer (D-8).
+
+Los demás detalles (a qué distancia, a quién se le muestra cada perfil, cómo se verifica la edad, qué pasa al bloquear o denunciar) **no están definidos**. Están en [pendientes.md](pendientes.md). No los inventes: preguntale a Sergio o registralos como supuesto.
