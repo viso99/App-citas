@@ -24,8 +24,9 @@
 | `src/proxy.ts` | Antes de cada página: renueva la sesión y manda a `/entrar` a quien entra a `/perfil` o `/descubrir` sin sesión |
 | `src/app/page.tsx` | Portada con "Empezar" |
 | `src/app/entrar/page.tsx` | Correo → código o enlace → sesión. Sirve para registrarse y para entrar. Después lleva a `/descubrir` |
-| `src/app/descubrir/` | `page.tsx` manda al perfil si no existe, pide la ubicación si falta y si no muestra las tarjetas. `cards.ts` trae los perfiles (función `discover_profiles`) y firma sus fotos. `SwipeDeck.tsx` es el mazo (deslizar, botones, tocar para cambiar de foto). `actions.ts`: guardar ubicación, buscar ciudades, deslizar, pedir más perfiles |
-| `src/components/` | `LocationSetter.tsx` (ubicación del móvil o ciudad) y `AppNav.tsx` (barra de abajo: Descubrir y Perfil) |
+| `src/app/descubrir/` | `page.tsx` manda al perfil si no existe, pide la ubicación si falta y si no muestra las tarjetas. `cards.ts` trae los perfiles (función `discover_profiles`) y firma sus fotos. `SwipeDeck.tsx` es el mazo (deslizar, botones, tocar para cambiar de foto). `actions.ts`: guardar ubicación, buscar ciudades, deslizar (dice si hubo coincidencia), pedir más perfiles |
+| `src/app/coincidencias/page.tsx` | Lista de coincidencias (función `my_matches`) con la primera foto firmada |
+| `src/components/` | `LocationSetter.tsx` (ubicación del móvil o ciudad) y `AppNav.tsx` (barra de abajo: Descubrir, Coincidencias y Perfil) |
 | `src/app/perfil/` | Pantalla del perfil: `page.tsx` carga datos y fotos (enlaces firmados de 1 hora), `ProfileForm.tsx` es el formulario (fotos, datos, qué perfiles quiere ver y ubicación), `actions.ts` guarda el perfil y cierra sesión |
 | `src/app/manifest.ts` | Permite añadir la web a la pantalla de inicio del móvil |
 
@@ -50,6 +51,15 @@ Migración `20261109010000_descubrir.sql` (D-10, D-11, D-12):
 - `swipes`: un "me gusta" o "paso" por pareja. Solo se escribe con la función `swipe()`, que comprueba que el perfil sea visible y no pisa un "me gusta".
 
 **[Verificado 2026-11-09]** en un PostgreSQL 16 local con `auth` y `storage` simulados: redondeo de la ubicación; filtros de género en las dos direcciones, edad, distancia y mínimo de fotos; "paso" que vuelve a los 30 días; "me gusta" que no se pisa; no se puede deslizar un perfil no visible ni escribir directo en `swipes`; las fotos ajenas solo se ven si el perfil es visible; un usuario sin sesión no puede llamar a las funciones.
+
+Migración `20261109020000_coincidencias.sql`:
+
+- `matches`: una fila por pareja (el id menor en `user_a`). Solo la ven sus dos personas; nadie la escribe directamente.
+- `swipe()` ahora devuelve si se creó una coincidencia: cuando es "me gusta" y la otra persona ya había dado "me gusta". Usa un candado por pareja para que dos "me gusta" simultáneos no la pierdan.
+- `can_see_profile()` también deja ver el perfil y las fotos de las propias coincidencias, aunque después cambien las preferencias de edad o distancia.
+- `my_matches()`: las coincidencias propias con nombre, edad, primera foto y fecha.
+
+**[Verificado 2026-11-09]** en el mismo PostgreSQL local: un "me gusta" sin respuesta no crea coincidencia; un "paso" tampoco; el segundo "me gusta" sí, una sola fila; las dos personas la ven en `my_matches`; las fotos se siguen viendo tras cambiar preferencias; un tercero no ve coincidencias ajenas ni puede crearlas; sin sesión no se puede llamar.
 
 ## Reglas de arquitectura
 
