@@ -16,7 +16,7 @@ Están más o menos en el orden en que se van a necesitar. P-2 (qué lleva el pe
 
 | # | Pregunta | Cuándo hace falta |
 |---|---|---|
-| P-1 | **Nombre y marca** de la app (también el dominio web). | Antes de diseñar pantallas o publicar |
+| P-1 | **Marca y dominio de Zuvi** (D-15): comprar el dominio (zuvi.es o zuvi.app), registrar la marca en España o la UE, logo y colores. | Antes de abrir a usuarios reales |
 | P-4 | **Cómo se verifica la mayoría de edad:** solo fecha de nacimiento declarada, o algo más fuerte (foto de verificación, documento). | Antes de abrir a usuarios reales |
 | P-5 | **En qué plazo se revisan las denuncias** y qué se hace con un perfil denunciado de verdad (suspender, borrar). Qué pasa al denunciar ya está en D-14. | Antes de abrir a usuarios reales |
 | P-8 | **Modelo de negocio:** gratis, suscripción, pagos por funciones. Fuera de la primera versión, pero afecta el diseño a futuro. | Después de la primera versión |

@@ -16,7 +16,7 @@ Qué hay **realmente** en el repo. No es lo que el producto debe hacer: eso est�
 
 ## Límites conocidos
 
-- El nombre "Citas" es provisional (P-1) y no hay ícono propio.
+- La app se llama **Zuvi** (D-15), pero todavía no tiene dominio, logo ni ícono propios (P-1).
 - Las fotos no se pueden reordenar: quedan en el orden en que se subieron.
 - La coincidencia solo se avisa a quien da el segundo "me gusta" (en ese momento). La otra persona la ve en su lista, sin notificación.
 - No se puede deshacer un "paso" ni un "me gusta", ni quitar un bloqueo.
