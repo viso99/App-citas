@@ -24,8 +24,11 @@
 | `src/proxy.ts` | Antes de cada página: renueva la sesión y manda a `/entrar` a quien entra a `/perfil` o `/descubrir` sin sesión |
 | `src/app/page.tsx` | Portada con "Empezar" |
 | `src/app/entrar/page.tsx` | Correo → código o enlace → sesión. Sirve para registrarse y para entrar. Después lleva a `/descubrir` |
-| `src/app/descubrir/` | `page.tsx` manda al perfil si no existe, pide la ubicación si falta y si no muestra las tarjetas. `cards.ts` trae los perfiles (función `discover_profiles`) y firma sus fotos. `SwipeDeck.tsx` es el mazo (deslizar, botones, tocar para cambiar de foto). `actions.ts`: guardar ubicación, buscar ciudades, deslizar, pedir más perfiles |
-| `src/components/` | `LocationSetter.tsx` (ubicación del móvil o ciudad) y `AppNav.tsx` (barra de abajo: Descubrir y Perfil) |
+| `src/app/descubrir/` | `page.tsx` manda al perfil si no existe, pide la ubicación si falta y si no muestra las tarjetas. `cards.ts` trae los perfiles (función `discover_profiles`) y firma sus fotos. `SwipeDeck.tsx` es el mazo (deslizar, botones, tocar para cambiar de foto). `actions.ts`: guardar ubicación, buscar ciudades, deslizar (dice si hubo coincidencia), pedir más perfiles |
+| `src/app/coincidencias/page.tsx` | Lista de coincidencias (función `my_matches`) con la primera foto firmada y el último mensaje; cada una abre su chat |
+| `src/app/chat/[id]/` | `page.tsx` comprueba que haya coincidencia y carga los últimos 200 mensajes; `ChatRoom.tsx` los muestra, envía (insert directo, protegido por RLS) y recibe los nuevos con Supabase Realtime |
+| `src/lib/chat.ts` | Reglas del chat sin dependencias: largo máximo, orden de la pareja (`pairOf`). Pruebas en `chat.test.ts` |
+| `src/components/` | `LocationSetter.tsx` (ubicación del móvil o ciudad) y `AppNav.tsx` (barra de abajo: Descubrir, Coincidencias y Perfil) |
 | `src/app/perfil/` | Pantalla del perfil: `page.tsx` carga datos y fotos (enlaces firmados de 1 hora), `ProfileForm.tsx` es el formulario (fotos, datos, qué perfiles quiere ver y ubicación), `actions.ts` guarda el perfil y cierra sesión |
 | `src/app/manifest.ts` | Permite añadir la web a la pantalla de inicio del móvil |
 
@@ -50,6 +53,33 @@ Migración `20261109010000_descubrir.sql` (D-10, D-11, D-12):
 - `swipes`: un "me gusta" o "paso" por pareja. Solo se escribe con la función `swipe()`, que comprueba que el perfil sea visible y no pisa un "me gusta".
 
 **[Verificado 2026-11-09]** en un PostgreSQL 16 local con `auth` y `storage` simulados: redondeo de la ubicación; filtros de género en las dos direcciones, edad, distancia y mínimo de fotos; "paso" que vuelve a los 30 días; "me gusta" que no se pisa; no se puede deslizar un perfil no visible ni escribir directo en `swipes`; las fotos ajenas solo se ven si el perfil es visible; un usuario sin sesión no puede llamar a las funciones.
+
+Migración `20261109020000_coincidencias.sql`:
+
+- `matches`: una fila por pareja (el id menor en `user_a`). Solo la ven sus dos personas; nadie la escribe directamente.
+- `swipe()` ahora devuelve si se creó una coincidencia: cuando es "me gusta" y la otra persona ya había dado "me gusta". Usa un candado por pareja para que dos "me gusta" simultáneos no la pierdan.
+- `can_see_profile()` también deja ver el perfil y las fotos de las propias coincidencias, aunque después cambien las preferencias de edad o distancia.
+- `my_matches()`: las coincidencias propias con nombre, edad, primera foto y fecha.
+
+**[Verificado 2026-11-09]** en el mismo PostgreSQL local: un "me gusta" sin respuesta no crea coincidencia; un "paso" tampoco; el segundo "me gusta" sí, una sola fila; las dos personas la ven en `my_matches`; las fotos se siguen viendo tras cambiar preferencias; un tercero no ve coincidencias ajenas ni puede crearlas; sin sesión no se puede llamar.
+
+Migración `20261109030000_chat.sql`:
+
+- `messages`: pertenece a una coincidencia (clave `user_a`, `user_b` hacia `matches`, se borra con ella). Texto de 1 a 1.000 caracteres.
+- RLS: leen las dos personas de la coincidencia; escribe solo una de ellas, en nombre propio y si la coincidencia existe.
+- Se agrega a la publicación `supabase_realtime` para recibir mensajes en tiempo real (Realtime respeta RLS).
+- `my_matches()` suma el último mensaje y ordena por actividad.
+
+**[Verificado 2026-11-09]** en el PostgreSQL local: escribir y leer entre la pareja; no se puede escribir en nombre del otro, sin coincidencia, en un chat ajeno ni un mensaje vacío; un tercero no ve mensajes; borrar la coincidencia borra los mensajes.
+
+Migración `20261109040000_bloquear_denunciar.sql` (D-14):
+
+- `blocks`: quién bloqueó a quién. Cada uno ve solo a quién bloqueó; nadie escribe directamente.
+- `reports`: denuncias con motivo (`report_reason`), texto opcional de hasta 500 caracteres y `reviewed_at`, que completa quien revisa. Una por persona y perfil. RLS sin políticas: la app no las lee ni las escribe directamente.
+- `can_see_profile()` excluye los bloqueos en las dos direcciones y los perfiles con 3 o más denuncias sin revisar de personas distintas. Las coincidencias existentes se siguen viendo.
+- `block_user()` y `report_user()`: comprueban que se puede ver el perfil, guardan el bloqueo con el mismo candado por pareja que `swipe()` y borran la coincidencia (y el chat). `report_user()` además guarda la denuncia.
+
+**[Verificado 2026-11-09]** en el PostgreSQL local: bloquear borra coincidencia y mensajes y repetirlo no falla; ninguno de los dos se ve en Descubrir ni ve las fotos del otro; quien fue bloqueado no ve el bloqueo ni puede deslizar; con 2 denuncias el perfil se sigue viendo y con 3 se oculta, y vuelve al marcarlas revisadas; repetir una denuncia no suma; nadie lee denuncias desde la app; motivos inválidos y textos largos se rechazan; sin sesión no se puede llamar.
 
 ## Reglas de arquitectura
 

@@ -2,23 +2,23 @@
 
 Qué hay **realmente** en el repo. No es lo que el producto debe hacer: eso está en [producto.md](producto.md). Cómo está organizado el código: [arquitectura.md](arquitectura.md).
 
-**[Verificado 2026-11-09]** en la rama `claude/descubrir`: lint, typecheck, 20 pruebas y build pasan. La migración `20261109010000_descubrir.sql` se probó en un PostgreSQL 16 local y **[Verificado 2026-11-09]** está aplicada en Supabase (10 políticas en las tablas, 4 en el almacenamiento, 6 columnas nuevas en `profiles`, RLS en `swipes`, y las funciones no se pueden llamar sin sesión). **[Verificado 2026-11-09]** el proyecto de Supabase `app-citas` existe (región eu-west-1, Irlanda) y tiene aplicada la migración `20261109000000_perfiles.sql` (8 políticas en las tablas, 3 en el almacenamiento, bucket privado). **[Confirmado 2026-11-09]** Sergio probó en el celular, en https://app-citas-khaki.vercel.app, el registro con enlace y el perfil con fotos, y funcionó.
+**[Verificado 2026-11-09]** en la rama `claude/bloquear`: lint, typecheck, 26 pruebas y build pasan. La migración `20261109040000_bloquear_denunciar.sql` se probó en un PostgreSQL 16 local y **[Verificado 2026-11-09]** está aplicada en Supabase (D-13): `blocks` y `reports` con RLS (1 política, en `blocks`), `block_user` y `report_user` solo para usuarios con sesión, y las funciones internas sin acceso desde la app. **[Verificado 2026-11-09]** en la rama `claude/chat`: lint, typecheck, 23 pruebas y build pasan. La migración `20261109030000_chat.sql` se probó en un PostgreSQL 16 local y **[Verificado 2026-11-09]** está aplicada en Supabase (D-13): `messages` con RLS y 2 políticas, incluida en Realtime, y `my_matches` nueva solo para usuarios con sesión. La migración `20261109020000_coincidencias.sql` se probó en local y **[Verificado 2026-11-09]** está aplicada en Supabase (`matches` con RLS y 1 política, `swipe()` devuelve `boolean`, `swipe` y `my_matches` solo para usuarios con sesión). La migración `20261109010000_descubrir.sql` se probó en local y **[Verificado 2026-11-09]** está aplicada en Supabase (10 políticas en las tablas, 4 en el almacenamiento, 6 columnas nuevas en `profiles`, RLS en `swipes`, y las funciones no se pueden llamar sin sesión). **[Verificado 2026-11-09]** el proyecto de Supabase `app-citas` existe (región eu-west-1, Irlanda) y tiene aplicada la migración `20261109000000_perfiles.sql` (8 políticas en las tablas, 3 en el almacenamiento, bucket privado). **[Confirmado 2026-11-09]** Sergio probó en el celular, en https://app-citas-khaki.vercel.app, el registro con enlace y el perfil con fotos, y funcionó.
 
 ## Primera versión: qué está hecho
 
 | Parte (de [producto.md](producto.md)) | Estado |
 |---|---|
 | 1. Registro y perfil | **Hecho y probado por Sergio en el celular.** Registro y entrada con correo (por ahora llega un enlace; el código llega cuando haya servicio de correo propio). Perfil con nombre, fecha de nacimiento (18+), descripción opcional, género, a quién quiere conocer, consentimiento y de 2 a 6 fotos privadas |
-| 2. Descubrir y deslizar | **Hecho en código (rama `claude/descubrir`), sin probar con gente real.** Ubicación aproximada (móvil o ciudad), preferencias de edad y distancia, tarjetas con fotos, deslizar o botones de "me gusta" y "paso". Los "me gusta" se guardan, pero todavía no generan coincidencias |
-| 3. Coincidencias | No empezado |
-| 4. Chat | No empezado |
-| 5. Bloquear y denunciar | No empezado |
+| 2. Descubrir y deslizar | **Publicado, sin probar con gente real.** Ubicación aproximada (móvil o ciudad), preferencias de edad y distancia, tarjetas con fotos, deslizar o botones de "me gusta" y "paso" |
+| 3. Coincidencias | **Publicado, sin probar con gente real.** Un "me gusta" mutuo crea la coincidencia: aviso "¡Es una coincidencia!" en Descubrir y pantalla `/coincidencias` con la lista (foto, nombre, edad y fecha). Todavía no se puede deshacer una coincidencia |
+| 4. Chat | **Hecho en código (rama `claude/chat`), sin probar con gente real.** Desde la lista de coincidencias se abre `/chat/<id>`: mensajes de texto (hasta 1.000 caracteres) que llegan en tiempo real, con la hora. La lista muestra el último mensaje y se ordena por actividad. Sin fotos, sin avisos de mensaje nuevo fuera de la app y sin "leído" |
+| 5. Bloquear y denunciar | **Hecho en código (rama `claude/bloquear`), sin probar con gente real.** Botón "⋯" en la tarjeta de Descubrir y en el chat, con "Bloquear" y "Denunciar" (motivo y texto opcional). Bloquear borra la coincidencia y el chat; con 3 denuncias sin revisar el perfil se oculta de Descubrir (D-14). No hay pantalla para ver o quitar bloqueos ni para revisar denuncias: se revisan en Supabase ([desarrollo.md](desarrollo.md)) |
 
 ## Límites conocidos
 
 - El nombre "Citas" es provisional (P-1) y no hay ícono propio.
 - No se puede borrar la cuenta desde la app todavía (regla 6 de [privacidad-y-legal.md](privacidad-y-legal.md)); ver P-11.
 - Las fotos no se pueden reordenar: quedan en el orden en que se subieron.
-- Todavía no se avisa de las coincidencias: los "me gusta" mutuos se guardan y se usarán en la parte 3.
-- No se puede deshacer un "paso" ni un "me gusta".
+- La coincidencia solo se avisa a quien da el segundo "me gusta" (en ese momento). La otra persona la ve en su lista, sin notificación.
+- No se puede deshacer un "paso" ni un "me gusta", ni quitar un bloqueo.
 - Los correos de acceso usan el envío de prueba de Supabase, con un límite muy bajo: **[Verificado 2026-11-09]** al pasarlo, Supabase responde 429 `over_email_send_rate_limit` y la app pide esperar un rato. Hace falta un servicio de correo propio antes de abrir a más gente (ver [desarrollo.md](desarrollo.md)).

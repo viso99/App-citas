@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { SafetyMenu } from "@/components/safety/SafetyMenu";
 import { distanceLabel } from "@/lib/discover";
 import { nextCards, swipe } from "./actions";
 import type { Card } from "./cards";
@@ -19,6 +20,7 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
   const [leaving, setLeaving] = useState<Choice | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [exhausted, setExhausted] = useState(initialCards.length === 0);
+  const [matchWith, setMatchWith] = useState<Card | null>(null);
   const decided = useRef(new Set<string>());
   const loading = useRef(false);
   const start = useRef<{ x: number; y: number } | null>(null);
@@ -55,9 +57,18 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
       setDx(0);
       setPhoto(0);
     }, 200);
-    swipe(target.id, choice).then(({ ok }) => {
+    swipe(target.id, choice).then(({ ok, match }) => {
       if (!ok) setError("No pudimos guardar tu respuesta. Comprueba la conexión.");
+      else if (match) setMatchWith(target);
     });
+  }
+
+  // Tras bloquear o denunciar, la tarjeta se va sin registrar "paso" ni "me gusta".
+  function removeBlocked(id: string) {
+    decided.current.add(id);
+    setCards((current) => current.filter((c) => c.id !== id));
+    setDx(0);
+    setPhoto(0);
   }
 
   function onPointerDown(e: React.PointerEvent) {
@@ -86,9 +97,12 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
     else setDx(0);
   }
 
+  const overlay = matchWith && <MatchOverlay card={matchWith} onClose={() => setMatchWith(null)} />;
+
   if (!card) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+        {overlay}
         <p className="text-lg">{exhausted ? "No hay más perfiles cerca por ahora." : "Buscando perfiles…"}</p>
         {exhausted && (
           <p className="text-zinc-600 dark:text-zinc-300">
@@ -109,52 +123,66 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <div
-        key={card.id}
-        role="group"
-        aria-label={`${card.firstName}, ${card.age}`}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={() => {
-          start.current = null;
-          setDragging(false);
-          setDx(0);
-        }}
-        style={{
-          transform: `translateX(${offset}px) rotate(${offset / 20}deg)`,
-          transition: dragging ? "none" : "transform 200ms ease-out",
-          touchAction: "pan-y",
-        }}
-        className="relative h-[calc(100dvh-15rem)] max-h-[640px] min-h-80 w-full select-none overflow-hidden rounded-3xl bg-zinc-200 shadow-lg"
-      >
-        {card.photos[photo] && (
-          // eslint-disable-next-line @next/next/no-img-element -- enlaces firmados y temporales
-          <img src={card.photos[photo]} alt="" draggable={false} className="h-full w-full object-cover" />
-        )}
-        {card.photos.length > 1 && (
-          <div className="absolute inset-x-3 top-3 flex gap-1">
-            {card.photos.map((_, i) => (
-              <span key={i} className={`h-1 flex-1 rounded-full ${i === photo ? "bg-white" : "bg-white/40"}`} />
-            ))}
+      {overlay}
+      <div className="relative">
+        <div
+          key={card.id}
+          role="group"
+          aria-label={`${card.firstName}, ${card.age}`}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={() => {
+            start.current = null;
+            setDragging(false);
+            setDx(0);
+          }}
+          style={{
+            transform: `translateX(${offset}px) rotate(${offset / 20}deg)`,
+            transition: dragging ? "none" : "transform 200ms ease-out",
+            touchAction: "pan-y",
+          }}
+          className="relative h-[calc(100dvh-15rem)] max-h-[640px] min-h-80 w-full select-none overflow-hidden rounded-3xl bg-zinc-200 shadow-lg"
+        >
+          {card.photos[photo] && (
+            // eslint-disable-next-line @next/next/no-img-element -- enlaces firmados y temporales
+            <img src={card.photos[photo]} alt="" draggable={false} className="h-full w-full object-cover" />
+          )}
+          {card.photos.length > 1 && (
+            <div className="absolute inset-x-3 top-3 flex gap-1">
+              {card.photos.map((_, i) => (
+                <span key={i} className={`h-1 flex-1 rounded-full ${i === photo ? "bg-white" : "bg-white/40"}`} />
+              ))}
+            </div>
+          )}
+          {hint && (
+            <span
+              className={`absolute top-8 rounded-lg border-4 px-3 py-1 text-2xl font-bold uppercase ${
+                hint === "me_gusta"
+                  ? "left-6 -rotate-12 border-green-500 text-green-500"
+                  : "right-6 rotate-12 border-red-500 text-red-500"
+              }`}
+            >
+              {hint === "me_gusta" ? "Me gusta" : "Paso"}
+            </span>
+          )}
+          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 to-transparent p-5 pt-16 text-white">
+            <p className="text-2xl font-bold">
+              {card.firstName}, {card.age}
+            </p>
+            <p className="text-sm text-white/80">{distanceLabel(card.distanceKm)}</p>
+            {card.bio && <p className="line-clamp-3 text-white/90">{card.bio}</p>}
           </div>
-        )}
-        {hint && (
-          <span
-            className={`absolute top-8 rounded-lg border-4 px-3 py-1 text-2xl font-bold uppercase ${
-              hint === "me_gusta" ? "left-6 -rotate-12 border-green-500 text-green-500" : "right-6 rotate-12 border-red-500 text-red-500"
-            }`}
-          >
-            {hint === "me_gusta" ? "Me gusta" : "Paso"}
-          </span>
-        )}
-        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 to-transparent p-5 pt-16 text-white">
-          <p className="text-2xl font-bold">
-            {card.firstName}, {card.age}
-          </p>
-          <p className="text-sm text-white/80">{distanceLabel(card.distanceKm)}</p>
-          {card.bio && <p className="line-clamp-3 text-white/90">{card.bio}</p>}
         </div>
+        {!leaving && !dragging && (
+          <SafetyMenu
+            key={card.id}
+            targetId={card.id}
+            name={card.firstName}
+            onDone={() => removeBlocked(card.id)}
+            className="absolute right-3 top-6 bg-black/40 text-white"
+          />
+        )}
       </div>
 
       <div className="flex justify-center gap-8">
@@ -178,6 +206,38 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
         </button>
       </div>
       {error && <p className="text-center text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+function MatchOverlay({ card, onClose }: { card: Card; onClose: () => void }) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="match-title"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-rose-600/95 px-6 text-center text-white"
+    >
+      <h2 id="match-title" className="text-4xl font-bold">
+        ¡Es una coincidencia!
+      </h2>
+      {card.photos[0] && (
+        // eslint-disable-next-line @next/next/no-img-element -- enlaces firmados y temporales
+        <img src={card.photos[0]} alt="" className="h-40 w-40 rounded-full border-4 border-white object-cover" />
+      )}
+      <p className="text-lg">A {card.firstName} y a ti os habéis gustado.</p>
+      <div className="flex w-full max-w-xs flex-col gap-3">
+        <Link href="/coincidencias" className="rounded-full bg-white px-6 py-3 text-lg font-semibold text-rose-600">
+          Ver mis coincidencias
+        </Link>
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-full border-2 border-white px-6 py-3 text-lg font-semibold"
+        >
+          Seguir descubriendo
+        </button>
+      </div>
     </div>
   );
 }

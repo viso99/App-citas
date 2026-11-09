@@ -12,7 +12,7 @@
 - **Supabase:** proyecto `app-citas` (ref `wrjewtfkvzhcwmltpgvw`), región eu-west-1 (Irlanda). Migraciones aplicadas a mano desde SQL Editor.
 - **Vercel:** proyecto `viso99/app-citas`, dirección de prueba **https://app-citas-khaki.vercel.app**. Se publica solo con cada cambio en `main`. Variables: `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 - **URL Configuration de Supabase:** Site URL = la dirección de Vercel; Redirect URLs = `https://app-citas-khaki.vercel.app/**` y `http://localhost:3000/**`.
-- Una migración nueva **no** se aplica sola: hay que ejecutarla en SQL Editor (o con la CLI) antes o junto con el merge que la usa.
+- Una migración nueva **no** se aplica sola: hay que ejecutarla en SQL Editor (o con la CLI) antes o junto con el merge que la usa. Las que solo agregan cosas las aplica Claude y lo avisa en el PR; las que borran o cambian datos, con el visto bueno de Sergio (D-13).
 
 ## Configurar Supabase (una sola vez)
 
@@ -35,6 +35,13 @@ npm run build
 ```
 
 La CI de GitHub (`.github/workflows/ci.yml`) corre lint, typecheck, pruebas y build en cada PR.
+
+## Revisar denuncias (D-14)
+
+En Supabase, **Table Editor → `reports`**: cada fila es una denuncia con quién denuncia (`reporter_id`), a quién (`reported_id`), el motivo y el texto. Las que tienen `reviewed_at` vacío están sin revisar. Un perfil con 3 o más sin revisar está oculto de Descubrir.
+
+- Para dar por revisada una denuncia, completá `reviewed_at` con la fecha y hora actual. Si el perfil estaba oculto y quedan menos de 3 sin revisar, vuelve a aparecer.
+- Los bloqueos están en `blocks`. Qué hacer con un perfil denunciado de verdad todavía no está decidido (P-5).
 
 ## Avisos para quien programe
 

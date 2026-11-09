@@ -56,9 +56,18 @@ Detalles técnicos (se pueden revisar): la edad y la distancia filtran según la
 
 **D-11 · 2026-11-09 · vigente** (antes P-7)
 Un **"paso" esconde el perfil 30 días**; después puede volver a aparecer. Un **"me gusta" es para siempre**: ese perfil no vuelve a salir.
-*Por qué:* Sergio eligió la opción recomendada: al empezar habrá poca gente y el mazo se vaciaría pronto; además la gente cambia de idea o de fotos. Los perfiles bloqueados no volverán nunca (cuando exista bloquear).
+*Por qué:* Sergio eligió la opción recomendada: al empezar habrá poca gente y el mazo se vaciaría pronto; además la gente cambia de idea o de fotos. Los perfiles bloqueados no vuelven nunca (D-14).
 
 **D-12 · 2026-11-09 · vigente**
 La ubicación se toma **del móvil, con permiso**, y se guarda **redondeada a unos 2 km**. Si la persona no da permiso, **elige su ciudad o pueblo** de una lista. A los demás solo se les muestra "a N km" (nunca menos de "a menos de 2 km").
 *Por qué:* Sergio eligió la opción recomendada: es lo que la gente espera, y al redondear nunca se guarda ni se muestra dónde está alguien exactamente (regla 3 de [privacidad-y-legal.md](privacidad-y-legal.md)).
 Detalles técnicos (se pueden revisar): la base redondea a una cuadrícula de 0,02 grados aunque la app mande una ubicación precisa. La distancia se calcula con la fórmula del haversine en SQL, **sin PostGIS**: con pocos usuarios alcanza y evita una extensión más; se puede pasar a PostGIS si crece. La lista de municipios (2.824 de España con más de 1.000 habitantes) sale de GeoNames (licencia CC BY 4.0, hay que citarla) a través del paquete `all-the-cities` 3.1.0, y está en `src/data/ciudades-es.json`.
+
+**D-13 · 2026-11-09 · vigente**
+Claude **aplica él mismo en Supabase los cambios de la base que solo agregan cosas** (tablas, columnas, funciones, reglas de acceso) y lo avisa en el PR. **Si un cambio borra o modifica datos, le pregunta a Sergio antes.**
+*Por qué:* Sergio eligió la opción recomendada para no frenar cada PR. Todavía no hay usuarios reales. Es una excepción acotada a "pasos que no se pueden deshacer" de D-5.
+
+**D-14 · 2026-11-09 · vigente** (antes P-5, en parte)
+**Bloquear** corta todo contacto en las dos direcciones: se borra la coincidencia y su chat, y ninguno de los dos vuelve a ver al otro en Descubrir. La persona bloqueada no recibe aviso. **Denunciar** pide un motivo (y un texto opcional), guarda la denuncia y **además bloquea**. Las denuncias **las revisa Sergio** desde Supabase. Si un perfil junta **3 denuncias sin revisar de personas distintas**, deja de aparecer en Descubrir hasta que se revisen (sus coincidencias y chats siguen).
+*Por qué:* Sergio eligió la opción recomendada: protege a la gente aunque la revisión tarde, y 3 denuncias de personas distintas es difícil de usar para perjudicar a alguien a propósito. El plazo de revisión sigue abierto (P-5).
+Detalles técnicos (se pueden revisar): todo pasa por las funciones `block_user()` y `report_user()` de la base. Nadie lee las denuncias desde la app. Los motivos y textos de la pantalla son una propuesta de Claude, a revisar por Sergio.
