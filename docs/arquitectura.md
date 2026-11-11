@@ -114,6 +114,10 @@ Migración `20261111040000_avisos_movil.sql` (D-24): tabla `push_subscriptions` 
 
 **[Verificado 2026-11-11]** en el PostgreSQL local: quien acaba de escribir obtiene las direcciones de la otra persona; pasados 2 minutos, quien no escribió o un tercero no obtiene nada; nadie ve ni crea direcciones ajenas.
 
+Migración `20261111050000_repaso.sql` (repaso antes de abrir): la hora de cada mensaje la pone siempre la base (trigger `messages_set_time`), para que nadie mande horas inventadas; `save_push_subscription()` guarda el móvil para los avisos y, si estaba a nombre de otra cuenta, lo pasa a la actual. Al pulsar "Salir" (`src/app/perfil/SignOutButton.tsx`) se quitan los avisos de ese móvil. `next.config.ts` añade cabeceras de seguridad (la app no se puede meter dentro de otra web, entre otras).
+
+**[Verificado 2026-11-11]** en el PostgreSQL local: un mensaje enviado con una hora futura se guarda con la hora real; un móvil guardado por una cuenta pasa a otra al activarlo allí, y queda una sola fila.
+
 ## Reglas de arquitectura
 
 1. Las reglas críticas van **en la base** (RLS, triggers, CHECK) además de en la app. La app ayuda con mensajes claros; la base es la que protege.

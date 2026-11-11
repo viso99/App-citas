@@ -4,10 +4,10 @@ import { AppNav } from "@/components/AppNav";
 import { DEFAULT_DISTANCE_KM, DEFAULT_MAX_AGE, DEFAULT_MIN_AGE } from "@/lib/discover";
 import { PHOTOS_BUCKET } from "@/lib/supabase/config";
 import { getUser } from "@/lib/supabase/server";
-import { signOut } from "./actions";
 import { BlockedList } from "./BlockedList";
 import { Verification } from "./Verification";
 import { PushToggle } from "./PushToggle";
+import { SignOutButton } from "./SignOutButton";
 import { DeleteAccount } from "./DeleteAccount";
 import { ProfileForm, type Photo } from "./ProfileForm";
 
@@ -17,11 +17,7 @@ export default function ProfilePage() {
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Tu perfil</h1>
-          <form action={signOut}>
-            <button type="submit" className="text-zinc-500 underline">
-              Salir
-            </button>
-          </form>
+          <SignOutButton />
         </div>
         <Suspense fallback={<p className="text-zinc-500">Cargando…</p>}>
           <Profile />

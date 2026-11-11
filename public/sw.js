@@ -24,9 +24,12 @@ self.addEventListener("notificationclick", (event) => {
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
       const open = windows.find((w) => w.url.startsWith(self.location.origin));
-      if (open) {
-        open.navigate(url);
-        return open.focus();
+      if (open && "navigate" in open) {
+        // navigate() falla si la ventana no está controlada por este service worker: entonces se abre una nueva.
+        return open
+          .navigate(url)
+          .then((w) => (w || open).focus())
+          .catch(() => self.clients.openWindow(url));
       }
       return self.clients.openWindow(url);
     }),
