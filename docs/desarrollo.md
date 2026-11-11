@@ -64,3 +64,12 @@ Sin ellas la app funciona, pero el botón de Perfil dice que el navegador no per
 - **Next.js 16:** cambió respecto de versiones anteriores. Leé `AGENTS.md` y la guía en `node_modules/next/dist/docs/` antes de escribir código de Next. Por ejemplo: el "middleware" ahora se llama `src/proxy.ts`, y con `cacheComponents` todo lo que lee la sesión tiene que estar dentro de un `<Suspense>`.
 - **Supabase:** en el servidor, usá `getUser()` de `src/lib/supabase/server.ts` (verifica la sesión contra Supabase). No confíes en `getSession()` del lado del servidor.
 - Las reglas de acceso (RLS) de la base son la protección real de los datos. Cualquier tabla nueva lleva RLS en la misma migración.
+
+## Recordatorio de chats parados (D-40)
+
+Una tarea programada de Vercel (`vercel.json`) llama una vez al día a `/api/recordatorios`. Necesita dos variables más en Vercel (Settings → Environment Variables), las dos **secretas** (nunca en el repositorio ni en el chat):
+
+- `SUPABASE_SECRET_KEY`: Supabase → Project Settings → API Keys → Secret keys.
+- `CRON_SECRET`: un texto largo al azar. Vercel lo manda solo en la llamada de la tarea, y la ruta rechaza cualquier otra.
+
+Sin ellas, la ruta no hace nada y el resto de la app funciona igual.

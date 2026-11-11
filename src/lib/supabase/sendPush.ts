@@ -5,7 +5,11 @@ import { pushPayload, type PushKind } from "@/lib/push";
 
 // Envía el aviso a los móviles de la otra persona (D-24). Si las claves no están configuradas
 // (variables VAPID en Vercel), no hace nada. Nunca hace fallar la acción que lo llama.
-export async function sendPush(supabase: SupabaseClient, otherId: string, kind: PushKind): Promise<void> {
+export async function sendPush(
+  supabase: SupabaseClient,
+  otherId: string,
+  kind: Exclude<PushKind, "reminder">,
+): Promise<void> {
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;
   const subject = process.env.VAPID_SUBJECT;

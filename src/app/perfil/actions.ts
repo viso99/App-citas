@@ -16,6 +16,7 @@ import { PHOTOS_BUCKET, VERIFICATION_BUCKET } from "@/lib/supabase/config";
 import { chatFolder } from "@/lib/chat";
 import { removeChatPhotos } from "@/lib/supabase/chatPhotos";
 import { getUser } from "@/lib/supabase/server";
+import { isTravelCity, TRAVEL_CITIES } from "@/lib/travel";
 
 export type SaveResult =
   | { ok: true }
@@ -65,9 +66,14 @@ export async function saveProfile(input: ProfileInput, preferences: Preferences,
     smoking: more.extras.smoking,
     drinking: more.extras.drinking,
     children: more.extras.children,
+    looking_for: more.extras.lookingFor,
+    languages: more.extras.languages,
+    pets: more.extras.pets,
+    zodiac: more.extras.zodiac,
     filter_non_smokers: Boolean(more.filters.onlyNonSmokers),
     filter_wants_children: Boolean(more.filters.onlyWantsChildren),
     filter_verified: Boolean(more.filters.onlyVerified),
+    filter_same_goal: Boolean(more.filters.onlySameGoal),
     // Se conserva la fecha del primer consentimiento.
     sensitive_data_consent_at: existing?.sensitive_data_consent_at ?? new Date().toISOString(),
   });
@@ -91,6 +97,25 @@ export async function setPaused(paused: boolean): Promise<{ ok: boolean }> {
   const { data, error } = await supabase
     .from("profiles")
     .update({ paused: paused === true })
+    .eq("id", user.id)
+    .select("id");
+  return { ok: !error && (data?.length ?? 0) === 1 };
+}
+
+// Activa el modo viaje en una ciudad de la lista, o lo quita con null (D-39).
+export async function setTravel(city: string | null): Promise<{ ok: boolean }> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/entrar");
+  if (city !== null && !isTravelCity(city)) return { ok: false };
+  const target = city === null ? null : TRAVEL_CITIES[city];
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({
+      travel_city: city,
+      travel_lat: target?.lat ?? null,
+      travel_lon: target?.lon ?? null,
+      travel_started_at: target ? new Date().toISOString() : null,
+    })
     .eq("id", user.id)
     .select("id");
   return { ok: !error && (data?.length ?? 0) === 1 };

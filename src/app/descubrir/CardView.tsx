@@ -46,8 +46,20 @@ export function CardFace({ card, photo, children }: { card: Card; photo: number;
               <span aria-hidden>● </span>Activo hace poco
             </span>
           )}
+          {card.traveling && (
+            <span className="mr-2 font-semibold text-amber-300">
+              <span aria-hidden>✈️ </span>De viaje por aquí
+            </span>
+          )}
           {distanceLabel(card.distanceKm)}
         </p>
+        {card.lookingFor && (
+          <p className="w-fit rounded-full bg-white/20 px-3 py-0.5 text-sm font-medium">
+            <span className="sr-only">Busca: </span>
+            <span aria-hidden>🎯 </span>
+            {card.lookingFor}
+          </p>
+        )}
         {card.bio && <p className="line-clamp-3 text-white/90">{card.bio}</p>}
         {card.interests.length > 0 && (
           <ul className="mt-1 flex flex-wrap gap-1" aria-label="Aficiones">
@@ -78,8 +90,15 @@ export function ProfileDetails({ card }: { card: Card }) {
       </h2>
       <p className="text-sm text-zinc-500">
         {card.activeRecently && <span className="mr-2 font-semibold text-green-600">● Activo hace poco</span>}
+        {card.traveling && <span className="mr-2 font-semibold text-amber-600">✈️ De viaje por aquí</span>}
         {distanceLabel(card.distanceKm)}
       </p>
+      {card.lookingFor && (
+        <div className="rounded-2xl bg-rose-50 p-4 dark:bg-rose-950">
+          <p className="text-sm text-zinc-500">Busca</p>
+          <p className="text-lg font-semibold">{card.lookingFor}</p>
+        </div>
+      )}
       {card.bio && <p className="whitespace-pre-wrap">{card.bio}</p>}
       {card.details.length > 0 && (
         <ul className="flex flex-wrap gap-2">

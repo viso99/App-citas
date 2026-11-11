@@ -11,7 +11,7 @@ export function ChatSafety({ targetId, name }: { targetId: string; name: string 
       targetId={targetId}
       name={name}
       canUnmatch
-      className="ml-auto text-zinc-500"
+      className="text-zinc-500"
       onDone={() => {
         router.replace("/coincidencias");
         router.refresh();

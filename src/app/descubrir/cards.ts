@@ -1,7 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { interestChips } from "@/lib/interests";
-import { extrasLabels, PROMPTS, type PromptAnswer } from "@/lib/profileExtras";
+import { extrasFromRow, extrasLabels, lookingForLabel, PROMPTS, type PromptAnswer } from "@/lib/profileExtras";
 import { PHOTOS_BUCKET } from "@/lib/supabase/config";
 
 export type Card = {
@@ -22,6 +22,9 @@ export type Card = {
   // Mensaje que te dejó con su "me gusta" (D-26) y si usó la app en las últimas 24 horas (D-28).
   noteToMe: string | null;
   activeRecently: boolean;
+  // Qué busca (D-36) y si está de viaje por tu zona (D-39).
+  lookingFor: string | null;
+  traveling: boolean;
 };
 
 type Row = {
@@ -44,6 +47,11 @@ type Row = {
   verified: boolean;
   note_to_me: string | null;
   active_recently: boolean | null;
+  looking_for: string | null;
+  languages: string[] | null;
+  pets: string | null;
+  zodiac: string | null;
+  traveling: boolean | null;
 };
 
 // Los próximos perfiles de Descubrir, con sus fotos como enlaces firmados de una hora.
@@ -69,14 +77,9 @@ export async function loadCards(supabase: SupabaseClient, onlyLikers = false): P
     interests: interestChips(r.interests ?? [], r.shared_interests ?? []),
     superlikedMe: r.superliked_me === true,
     verified: r.verified === true,
-    details: extrasLabels({
-      heightCm: r.height_cm,
-      job: r.job ?? "",
-      studies: r.studies,
-      smoking: r.smoking,
-      drinking: r.drinking,
-      children: r.children,
-    }),
+    details: extrasLabels(extrasFromRow(r)),
+    lookingFor: lookingForLabel(r.looking_for),
+    traveling: r.traveling === true,
     prompts: (r.prompts ?? [])
       .filter((p) => Object.prototype.hasOwnProperty.call(PROMPTS, p.key))
       .map((p) => ({ question: PROMPTS[p.key as keyof typeof PROMPTS], answer: p.answer })),

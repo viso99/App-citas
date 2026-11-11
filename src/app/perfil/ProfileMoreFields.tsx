@@ -6,11 +6,16 @@ import {
   HEIGHT_MAX,
   HEIGHT_MIN,
   JOB_MAX,
+  LANGUAGES,
+  LOOKING_FOR,
+  MAX_LANGUAGES,
   MAX_PROMPTS,
+  PETS,
   PROMPT_ANSWER_MAX,
   PROMPTS,
   SMOKING,
   STUDIES,
+  ZODIAC,
   type Extras,
   type ExtrasErrors,
   type Filters,
@@ -42,6 +47,22 @@ export function MoreAboutYou({
     <>
       <fieldset className="flex flex-col gap-3">
         <legend className="mb-1 font-medium">Más sobre ti (todo opcional)</legend>
+        <label className="flex flex-col gap-1">
+          <span className="text-sm text-zinc-500">Qué buscas</span>
+          <select
+            value={value.extras.lookingFor ?? ""}
+            onChange={(e) => setExtra("lookingFor", e.target.value || null)}
+            className={field}
+          >
+            <option value="">Prefiero no decirlo</option>
+            {Object.entries(LOOKING_FOR).map(([key, text]) => (
+              <option key={key} value={key}>
+                {text}
+              </option>
+            ))}
+          </select>
+          {error("lookingFor")}
+        </label>
         <div className="grid grid-cols-2 gap-3">
           <label className="flex flex-col gap-1">
             <span className="text-sm text-zinc-500">Altura (cm)</span>
@@ -70,6 +91,39 @@ export function MoreAboutYou({
           <Select label="Tabaco" options={SMOKING} value={value.extras.smoking} onChange={(v) => setExtra("smoking", v)} />
           <Select label="Alcohol" options={DRINKING} value={value.extras.drinking} onChange={(v) => setExtra("drinking", v)} />
           <Select label="Hijos" options={CHILDREN} value={value.extras.children} onChange={(v) => setExtra("children", v)} />
+          <Select label="Mascotas" options={PETS} value={value.extras.pets} onChange={(v) => setExtra("pets", v)} />
+          <Select label="Signo" options={ZODIAC} value={value.extras.zodiac} onChange={(v) => setExtra("zodiac", v)} />
+        </div>
+        <div className="flex flex-col gap-2">
+          <span className="text-sm text-zinc-500">
+            Idiomas que hablas (hasta {MAX_LANGUAGES})
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(LANGUAGES).map(([key, text]) => {
+              const on = value.extras.languages.includes(key);
+              const full = !on && value.extras.languages.length >= MAX_LANGUAGES;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={on}
+                  disabled={full}
+                  onClick={() =>
+                    setExtra(
+                      "languages",
+                      on ? value.extras.languages.filter((l) => l !== key) : [...value.extras.languages, key],
+                    )
+                  }
+                  className={`rounded-full px-3 py-1 text-sm ${
+                    on ? "bg-rose-600 font-semibold text-white" : "bg-zinc-100 dark:bg-zinc-800"
+                  } disabled:opacity-40`}
+                >
+                  {text}
+                </button>
+              );
+            })}
+          </div>
+          {error("languages")}
         </div>
       </fieldset>
 
@@ -171,6 +225,7 @@ export function DiscoverFilters({ value, onChange }: { value: Filters; onChange:
       {box("onlyNonSmokers", "Solo personas que no fuman")}
       {box("onlyWantsChildren", "Solo personas que quieren hijos")}
       {box("onlyVerified", "Solo perfiles verificados")}
+      {box("onlySameGoal", "Solo quien busca lo mismo que yo")}
     </div>
   );
 }

@@ -1,11 +1,14 @@
 // Textos de los avisos en el móvil (D-24). Sin nombres ni contenido: se ven en la pantalla
 // bloqueada y no deben revelar con quién habla nadie.
-export type PushKind = "match" | "message";
+// "reminder" es el recordatorio de un chat parado (D-40).
+export type PushKind = "match" | "message" | "reminder";
 
 export function pushPayload(kind: PushKind, otherId: string) {
-  return kind === "match"
-    ? { title: "Zuvi", body: "¡Tienes una coincidencia nueva!", tag: "match", url: "/coincidencias" }
-    : { title: "Zuvi", body: "Tienes un mensaje nuevo.", tag: `chat-${otherId}`, url: `/chat/${otherId}` };
+  if (kind === "match") return { title: "Zuvi", body: "¡Tienes una coincidencia nueva!", tag: "match", url: "/coincidencias" };
+  if (kind === "reminder") {
+    return { title: "Zuvi", body: "Tienes una conversación esperando.", tag: `chat-${otherId}`, url: `/chat/${otherId}` };
+  }
+  return { title: "Zuvi", body: "Tienes un mensaje nuevo.", tag: `chat-${otherId}`, url: `/chat/${otherId}` };
 }
 
 // Convierte la clave pública VAPID (base64url) al formato que pide el navegador.

@@ -56,6 +56,16 @@ Tiene **nombre, marca y diseño propios**. "Como Tinder" describe el tipo de app
 17. **Ver mi perfil como lo ven los demás.**
 18. **Bienvenida** de 3 pantallas al entrar por primera vez, con consejos de seguridad.
 
+**[Confirmado 2026-11-11]** Y una tercera lista de 7 (D-36 a D-42), todas gratis. Sergio quitó la videollamada:
+
+19. **Qué buscas**, opcional y sin opciones sobre sexo, con filtro "Solo quien busca lo mismo que yo".
+20. **Responder a un mensaje concreto** en el chat, citándolo.
+21. **Compartir mi cita** con alguien de confianza: con quién, dónde y cuándo.
+22. **Modo viaje:** ver gente de otra ciudad de España antes de ir.
+23. **Idiomas, mascotas y signo** en el perfil.
+24. **Recordatorio de chats parados** en el móvil.
+25. **Descargar mis datos.**
+
 **[Confirmado 2026-11-09]** Registro con correo y código (D-7). El perfil lleva nombre de pila, fecha de nacimiento, de 2 a 6 fotos, descripción corta opcional, género y a quién quiere conocer (D-8).
 
 Los demás detalles (a qué distancia, a quién se le muestra cada perfil, cómo se verifica la edad, qué pasa al bloquear o denunciar) **no están definidos**. Están en [pendientes.md](pendientes.md). No los inventes: preguntale a Sergio o registralos como supuesto.

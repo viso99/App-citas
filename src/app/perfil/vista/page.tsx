@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { interestChips } from "@/lib/interests";
 import { ageOn, parseDate } from "@/lib/profile";
-import { extrasLabels, PROMPTS, type PromptAnswer } from "@/lib/profileExtras";
+import { extrasFromRow, extrasLabels, lookingForLabel, PROMPTS, type PromptAnswer } from "@/lib/profileExtras";
 import { PHOTOS_BUCKET } from "@/lib/supabase/config";
 import { getUser } from "@/lib/supabase/server";
 import type { Card } from "../../descubrir/cards";
@@ -56,14 +56,9 @@ async function Preview() {
     interests: interestChips(p.interests ?? [], []),
     superlikedMe: false,
     verified: Boolean(verification?.verified_at),
-    details: extrasLabels({
-      heightCm: p.height_cm,
-      job: p.job ?? "",
-      studies: p.studies,
-      smoking: p.smoking,
-      drinking: p.drinking,
-      children: p.children,
-    }),
+    details: extrasLabels(extrasFromRow(p)),
+    lookingFor: lookingForLabel(p.looking_for),
+    traveling: false,
     prompts: ((p.prompts ?? []) as PromptAnswer[])
       .filter((x) => Object.prototype.hasOwnProperty.call(PROMPTS, x.key))
       .map((x) => ({ question: PROMPTS[x.key as keyof typeof PROMPTS], answer: x.answer })),

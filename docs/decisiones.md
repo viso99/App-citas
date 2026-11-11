@@ -2,6 +2,8 @@
 
 Una entrada por decisión. No se borran: si una cambia, se marca como **reemplazada por D-N** y se agrega la nueva al final.
 
+**Desde D-36, las decisiones siguen en [decisiones-2.md](decisiones-2.md).**
+
 Formato: **ID · fecha · estado**, qué se decidió y por qué. Las decisiones técnicas las toma Claude (ver D-5) y se pueden revisar; las de producto son de Sergio.
 
 ---
@@ -122,7 +124,7 @@ Detalles técnicos (se pueden revisar): "Leído" usa `matches.a_seen_at`/`b_seen
 - **Preguntas:** hasta 3 de una lista de 15 ("Mi plan ideal de domingo es…"), con respuesta de hasta 150 caracteres.
 - **Filtros en Descubrir:** "Solo personas que no fuman", "Solo personas que quieren hijos" y "Solo perfiles verificados". Si un filtro está activo, solo sale quien lo indicó en su perfil.
 - **Perfil verificado:** en Perfil, la persona se hace un selfie imitando un gesto. **Lo revisa Sergio a mano en Supabase** (tabla `verifications`: completar `verified_at` o `rejected_at`, mirando el selfie en el bucket `verification-photos`). Si se aprueba, la tarjeta lleva "✔".
-*Por qué:* tercer grupo de las 10 funciones que pidió Sergio el 2026-11-11. Las listas y textos son propuesta de Claude, a revisar en el PR. A propósito no se pide religión, política, salud ni "qué busco" (podría revelar vida sexual): son categoría especial del RGPD.
+*Por qué:* tercer grupo de las 10 funciones que pidió Sergio el 2026-11-11. Las listas y textos son propuesta de Claude, a revisar en el PR. A propósito no se pide religión, política, salud ni "qué busco" (podría revelar vida sexual): son categoría especial del RGPD. *(Lo de "qué busco" lo reemplaza D-36: opcional y sin opciones sobre sexo.)*
 Detalles técnicos (se pueden revisar): columnas opcionales en `profiles` con sus opciones comprobadas en la base; `prompts` en JSON con `valid_prompts()`; la verificación vive en otra tabla que la app no puede escribir (solo `request_verification()`), así nadie se marca verificado a sí mismo. El selfie se borra al borrar la cuenta.
 
 **D-24 · 2026-11-11 · vigente**

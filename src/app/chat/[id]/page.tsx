@@ -8,6 +8,7 @@ import { icebreakers } from "@/lib/icebreakers";
 import type { PromptAnswer } from "@/lib/profileExtras";
 import { ChatRoom, type Message } from "./ChatRoom";
 import { ChatSafety } from "./ChatSafety";
+import { ShareDate } from "./ShareDate";
 
 export default function ChatPage(props: PageProps<"/chat/[id]">) {
   return (
@@ -17,7 +18,7 @@ export default function ChatPage(props: PageProps<"/chat/[id]">) {
   );
 }
 
-type MatchRow = { id: string; first_name: string; photo_path: string | null };
+type MatchRow = { id: string; first_name: string; age: number | null; photo_path: string | null };
 
 async function Chat({ params }: { params: Promise<{ id: string }> }) {
   const { id: otherId } = await params;
@@ -65,6 +66,7 @@ async function Chat({ params }: { params: Promise<{ id: string }> }) {
           <img src={signed.data.signedUrl} alt="" className="h-10 w-10 rounded-full object-cover" />
         )}
         <h1 className="text-lg font-semibold">{other.first_name}</h1>
+        <ShareDate name={other.first_name} age={other.age} />
         <ChatSafety targetId={other.id} name={other.first_name} />
       </header>
       <ChatRoom

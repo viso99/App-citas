@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { audioType, chatFolder, cleanMessage, cleanNote, formatSeconds, isRead, isUuid, MESSAGE_MAX, NOTE_MAX, pairOf } from "./chat";
+import { audioType, chatFolder, cleanMessage, cleanNote, formatSeconds, isRead, isUuid, MESSAGE_MAX, messagePreview, NOTE_MAX, pairOf } from "./chat";
 
 const a = "00000000-0000-0000-0000-00000000000a";
 const b = "00000000-0000-0000-0000-00000000000b";
@@ -61,5 +61,17 @@ describe("notas de voz y me gusta con mensaje", () => {
     expect(cleanNote("  hola ")).toBe("hola");
     expect(cleanNote("   ")).toBeNull();
     expect(cleanNote("x".repeat(NOTE_MAX + 1))).toBeNull();
+  });
+});
+
+describe("messagePreview", () => {
+  const base = { body: "", image_path: null, audio_path: null, deleted_at: null };
+  it("resume el mensaje citado", () => {
+    expect(messagePreview(undefined)).toBe("Mensaje anterior");
+    expect(messagePreview({ ...base, body: " hola\n\nqué tal " })).toBe("hola qué tal");
+    expect(messagePreview({ ...base, body: "x".repeat(200) })).toHaveLength(80);
+    expect(messagePreview({ ...base, audio_path: "a_b/1.webm" })).toBe("🎤 Audio");
+    expect(messagePreview({ ...base, image_path: "a_b/1.jpg" })).toBe("📷 Foto");
+    expect(messagePreview({ ...base, body: "hola", deleted_at: "2026-11-11" })).toBe("Mensaje eliminado");
   });
 });
