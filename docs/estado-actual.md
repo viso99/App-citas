@@ -21,11 +21,12 @@ Qué hay **realmente** en el repo. No es lo que el producto debe hacer: eso est�
 | Superlike (D-17) | **Hecho en código, sin probar con gente real.** Botón ★ en Descubrir, 1 al día. Quien lo recibe ve la tarjeta primero, con borde azul y "★ Te ha dado un superlike" |
 | Aficiones (D-18) | **Hecho en código, sin probar con gente real.** En el perfil, hasta 5 de 62 por grupos. En la tarjeta, las comunes primero y en color |
 | Ordenar las fotos (D-20) | **Hecho en código (rama `claude/project-thread-ss52zm`), sin probar con gente real.** Flechas en cada foto del perfil; la primera lleva "Principal" |
+| Control (D-21) | **Hecho en código (rama `claude/project-thread-ss52zm`), sin probar con gente real.** Deshacer el último paso, personas bloqueadas en Perfil, deshacer coincidencia en el chat. La migración `20261111010000_control.sql` se probó en PostgreSQL local; **todavía no está aplicada en Supabase** |
 | Aviso de novedades (D-19) | **Hecho en código, sin probar con gente real.** Punto en "Coincidencias" y etiqueta "Nuevo"; se marca como visto al abrir el chat. No hay notificaciones fuera de la app |
 
 ## Límites conocidos
 
 - La app se llama **Zuvi** (D-15), pero todavía no tiene dominio, logo ni ícono propios (P-1).
 - La coincidencia se avisa en el momento a quien da el segundo "me gusta"; la otra persona la ve con el punto de novedades cuando abre la app (no hay notificaciones del móvil).
-- No se puede deshacer un "paso" ni un "me gusta", ni quitar un bloqueo.
+- No se puede deshacer un "me gusta". Del "paso" solo se puede deshacer el último (D-21).
 - Los correos de acceso salen provisionalmente por el Gmail de Sergio (D-16), con un límite de 30 por hora. Si se pasa, la app pide esperar un rato. Antes de abrir a gente real hay que pasarlos a una dirección de zuvi.es.

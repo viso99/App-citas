@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { SafetyMenu } from "@/components/safety/SafetyMenu";
 import { distanceLabel } from "@/lib/discover";
-import { nextCards, superlike, swipe } from "./actions";
+import { nextCards, superlike, swipe, undoPass } from "./actions";
 import type { Card } from "./cards";
 
 const SWIPE_THRESHOLD = 100; // píxeles de arrastre para decidir
@@ -22,6 +22,9 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
   const [error, setError] = useState<string | null>(null);
   const [exhausted, setExhausted] = useState(initialCards.length === 0);
   const [matchWith, setMatchWith] = useState<Card | null>(null);
+  // El último perfil al que se le dio "paso", para poder deshacerlo (D-21).
+  const [lastPassed, setLastPassed] = useState<{ card: Card; saved: Promise<unknown> } | null>(null);
+  const [undoing, setUndoing] = useState(false);
   const decided = useRef(new Set<string>());
   const loading = useRef(false);
   const start = useRef<{ x: number; y: number } | null>(null);
@@ -63,6 +66,7 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
       setPhoto(0);
     }, 200);
     if (choice === "superlike") {
+      setLastPassed(null);
       setSuperlikesLeft(0);
       superlike(target.id).then(({ ok, match, limit }) => {
         if (limit) setError("Ya habías usado tu superlike de hoy, así que no se ha enviado.");
@@ -73,11 +77,43 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
       });
       return;
     }
-    swipe(target.id, choice).then(({ ok, match }) => {
+    const saved = swipe(target.id, choice).then(({ ok, match }) => {
       if (!ok) setError("No pudimos guardar tu respuesta. Comprueba la conexión.");
       else if (match) setMatchWith(target);
     });
+    setLastPassed(choice === "paso" ? { card: target, saved } : null);
   }
+
+  async function undo() {
+    if (!lastPassed || undoing || leaving) return;
+    const { card: back, saved } = lastPassed;
+    setUndoing(true);
+    setError(null);
+    await saved;
+    const { ok } = await undoPass(back.id);
+    setUndoing(false);
+    if (!ok) {
+      setError("No pudimos deshacer el último paso.");
+      return;
+    }
+    setLastPassed(null);
+    decided.current.delete(back.id);
+    setExhausted(false);
+    setCards((current) => [back, ...current.filter((c) => c.id !== back.id)]);
+    setPhoto(0);
+    setDx(0);
+  }
+
+  const undoButton = lastPassed && (
+    <button
+      type="button"
+      onClick={undo}
+      disabled={undoing || Boolean(leaving)}
+      className="mx-auto rounded-full border border-zinc-300 px-4 py-1.5 text-sm text-zinc-600 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300"
+    >
+      {undoing ? "Recuperando…" : `↶ Deshacer el paso a ${lastPassed.card.firstName}`}
+    </button>
+  );
 
   // Tras bloquear o denunciar, la tarjeta se va sin registrar "paso" ni "me gusta".
   function removeBlocked(id: string) {
@@ -129,6 +165,7 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
             .
           </p>
         )}
+        {undoButton}
         {error && <p className="text-red-600">{error}</p>}
       </div>
     );
@@ -258,6 +295,7 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
           ♥
         </button>
       </div>
+      {undoButton}
       {error && <p className="text-center text-red-600">{error}</p>}
     </div>
   );

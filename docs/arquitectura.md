@@ -98,6 +98,10 @@ Migración `20261111000000_superlike_aficiones_avisos.sql` (D-17, D-18, D-19):
 
 **[Verificado 2026-11-11]** en el PostgreSQL local: aficiones de más, repetidas o con formato raro se rechazan; el segundo superlike del día y el superlike a quien ya te gusta se rechazan; quien recibe el superlike lo ve primero y marcado, con las aficiones comunes; la coincidencia queda vista para quien da el segundo "me gusta" y nueva para el otro; un mensaje propio no genera novedad y uno ajeno sí, hasta abrir el chat; nadie puede marcar vistas ajenas ni llamar a `record_swipe()`; sin sesión no se pueden llamar.
 
+Migración `20261111010000_control.sql` (D-21): `undo_pass()` borra un "paso" propio (nunca un "me gusta"); `my_blocks()` lista a quién bloqueé (solo nombre); `unblock_user()` quita un bloqueo propio; `unmatch()` borra una coincidencia propia y su chat, con el candado por pareja.
+
+**[Verificado 2026-11-11]** en el PostgreSQL local: deshacer un "paso" devuelve el perfil a Descubrir y no deshace un "me gusta"; la lista de bloqueos solo la ve quien bloqueó y desbloquear devuelve el perfil a Descubrir; quien fue bloqueado no puede quitar el bloqueo; deshacer coincidencia borra la coincidencia y sus mensajes; sin sesión no se pueden llamar.
+
 ## Reglas de arquitectura
 
 1. Las reglas críticas van **en la base** (RLS, triggers, CHECK) además de en la app. La app ayuda con mensajes claros; la base es la que protege.

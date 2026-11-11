@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { REPORT_DETAILS_MAX, REPORT_REASONS, type ReportReason } from "@/lib/safety";
-import { blockUser, reportUser } from "./actions";
+import { blockUser, reportUser, unmatchUser } from "./actions";
 
-type Step = "closed" | "menu" | "block" | "report" | "done";
+type Step = "closed" | "menu" | "block" | "report" | "unmatch" | "done";
+type Outcome = "block" | "report" | "unmatch";
 
 // Menú "⋯" para bloquear o denunciar a una persona. `onDone` se llama al cerrar el aviso final.
 export function SafetyMenu({
@@ -12,18 +13,21 @@ export function SafetyMenu({
   name,
   onDone,
   className = "",
+  canUnmatch = false,
 }: {
   targetId: string;
   name: string;
   onDone: () => void;
   className?: string;
+  // En el chat se puede además deshacer la coincidencia (D-21).
+  canUnmatch?: boolean;
 }) {
   const [step, setStep] = useState<Step>("closed");
   const [reason, setReason] = useState<ReportReason | null>(null);
   const [details, setDetails] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [reported, setReported] = useState(false);
+  const [outcome, setOutcome] = useState<Outcome>("block");
 
   function close() {
     setStep("closed");
@@ -32,7 +36,7 @@ export function SafetyMenu({
     setError(null);
   }
 
-  async function run(action: () => Promise<{ ok: boolean }>, wasReport: boolean) {
+  async function run(action: () => Promise<{ ok: boolean }>, what: Outcome) {
     setBusy(true);
     setError(null);
     const { ok } = await action();
@@ -41,7 +45,7 @@ export function SafetyMenu({
       setError("No pudimos completarlo. Comprueba la conexión e inténtalo de nuevo.");
       return;
     }
-    setReported(wasReport);
+    setOutcome(what);
     setStep("done");
   }
 
@@ -59,13 +63,22 @@ export function SafetyMenu({
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={`Bloquear o denunciar a ${name}`}
+          aria-label={`Opciones de ${name}`}
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/50"
           onClick={(e) => e.target === e.currentTarget && step !== "done" && !busy && close()}
         >
           <div className="flex max-h-[90dvh] w-full max-w-md flex-col gap-4 overflow-y-auto rounded-t-3xl bg-white p-6 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100">
             {step === "menu" && (
               <>
+                {canUnmatch && (
+                  <button
+                    type="button"
+                    onClick={() => setStep("unmatch")}
+                    className="rounded-full border border-zinc-300 px-6 py-3 font-semibold dark:border-zinc-700"
+                  >
+                    Deshacer la coincidencia
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => setStep("block")}
@@ -86,6 +99,27 @@ export function SafetyMenu({
               </>
             )}
 
+            {step === "unmatch" && (
+              <>
+                <h2 className="text-xl font-bold">¿Deshacer la coincidencia con {name}?</h2>
+                <p className="text-zinc-600 dark:text-zinc-300">
+                  Se borrará vuestra conversación y no podréis volver a escribiros. {name} no recibirá ningún aviso.
+                </p>
+                {error && <p className="text-sm text-red-600">{error}</p>}
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => run(() => unmatchUser(targetId), "unmatch")}
+                  className="rounded-full bg-rose-600 px-6 py-3 font-semibold text-white disabled:opacity-50"
+                >
+                  {busy ? "Deshaciendo…" : "Deshacer la coincidencia"}
+                </button>
+                <button type="button" disabled={busy} onClick={close} className="py-2 text-zinc-500">
+                  Cancelar
+                </button>
+              </>
+            )}
+
             {step === "block" && (
               <>
                 <h2 className="text-xl font-bold">¿Bloquear a {name}?</h2>
@@ -96,7 +130,7 @@ export function SafetyMenu({
                 <button
                   type="button"
                   disabled={busy}
-                  onClick={() => run(() => blockUser(targetId), false)}
+                  onClick={() => run(() => blockUser(targetId), "block")}
                   className="rounded-full bg-rose-600 px-6 py-3 font-semibold text-white disabled:opacity-50"
                 >
                   {busy ? "Bloqueando…" : "Bloquear"}
@@ -112,7 +146,7 @@ export function SafetyMenu({
                 className="flex flex-col gap-4"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (reason) run(() => reportUser(targetId, reason, details), true);
+                  if (reason) run(() => reportUser(targetId, reason, details), "report");
                 }}
               >
                 <h2 className="text-xl font-bold">Denunciar a {name}</h2>
@@ -161,11 +195,19 @@ export function SafetyMenu({
 
             {step === "done" && (
               <>
-                <h2 className="text-xl font-bold">{reported ? "Gracias por avisarnos" : "Bloqueado"}</h2>
+                <h2 className="text-xl font-bold">
+                  {outcome === "report"
+                    ? "Gracias por avisarnos"
+                    : outcome === "unmatch"
+                      ? "Coincidencia deshecha"
+                      : "Bloqueado"}
+                </h2>
                 <p className="text-zinc-600 dark:text-zinc-300">
-                  {reported
+                  {outcome === "report"
                     ? `Revisaremos la denuncia. Ya no verás a ${name} y ${name} tampoco te verá a ti.`
-                    : `Ya no verás a ${name} y ${name} tampoco te verá a ti.`}
+                    : outcome === "unmatch"
+                      ? `Ya no tienes una coincidencia con ${name}.`
+                      : `Ya no verás a ${name} y ${name} tampoco te verá a ti.`}
                 </p>
                 <button
                   type="button"

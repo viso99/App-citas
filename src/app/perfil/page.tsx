@@ -5,6 +5,7 @@ import { DEFAULT_DISTANCE_KM, DEFAULT_MAX_AGE, DEFAULT_MIN_AGE } from "@/lib/dis
 import { PHOTOS_BUCKET } from "@/lib/supabase/config";
 import { getUser } from "@/lib/supabase/server";
 import { signOut } from "./actions";
+import { BlockedList } from "./BlockedList";
 import { DeleteAccount } from "./DeleteAccount";
 import { ProfileForm, type Photo } from "./ProfileForm";
 
@@ -22,6 +23,9 @@ export default function ProfilePage() {
         </div>
         <Suspense fallback={<p className="text-zinc-500">Cargando…</p>}>
           <Profile />
+        </Suspense>
+        <Suspense fallback={null}>
+          <BlockedList />
         </Suspense>
         <DeleteAccount />
       </main>
