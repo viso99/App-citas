@@ -36,7 +36,7 @@ async function Profile() {
 
   const [{ data: profile }, { data: photoRows }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-    supabase.from("profile_photos").select("id, storage_path").eq("user_id", user.id).order("position"),
+    supabase.from("profile_photos").select("id, storage_path").eq("user_id", user.id).order("position").order("created_at"),
   ]);
 
   // Las fotos son privadas: se muestran con enlaces firmados que caducan en una hora.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, parseDate, photoCountError, validatePhoto, validateProfile, type ProfileInput } from "./profile";
+import { ageOn, moveItem, parseDate, photoCountError, validatePhoto, validateProfile, type ProfileInput } from "./profile";
 
 const today = new Date(Date.UTC(2026, 10, 9)); // 2026-11-09
 
@@ -72,5 +72,16 @@ describe("fotos", () => {
     expect(photoCountError(2)).toBeNull();
     expect(photoCountError(6)).toBeNull();
     expect(photoCountError(7)).not.toBeNull();
+  });
+});
+
+describe("moveItem", () => {
+  it("mueve un elemento y deja el resto en orden", () => {
+    expect(moveItem(["a", "b", "c", "d"], 2, 0)).toEqual(["c", "a", "b", "d"]);
+    expect(moveItem(["a", "b", "c"], 0, 1)).toEqual(["b", "a", "c"]);
+  });
+  it("no cambia nada con posiciones fuera de la lista", () => {
+    expect(moveItem(["a", "b"], 0, 2)).toEqual(["a", "b"]);
+    expect(moveItem(["a", "b"], -1, 0)).toEqual(["a", "b"]);
   });
 });
