@@ -71,6 +71,7 @@ async function Profile() {
         gender: profile?.gender ?? "",
         interestedIn: profile?.interested_in ?? "",
         sensitiveConsent: Boolean(profile?.sensitive_data_consent_at),
+        interests: profile?.interests ?? [],
       }}
     />
   );

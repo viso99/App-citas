@@ -39,6 +39,7 @@ export async function saveProfile(input: ProfileInput, preferences: Preferences)
     min_age: preferences.minAge,
     max_age: preferences.maxAge,
     max_distance_km: preferences.maxDistanceKm,
+    interests: input.interests,
     // Se conserva la fecha del primer consentimiento.
     sensitive_data_consent_at: existing?.sensitive_data_consent_at ?? new Date().toISOString(),
   });

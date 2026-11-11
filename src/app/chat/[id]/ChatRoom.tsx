@@ -28,6 +28,13 @@ export function ChatRoom({
   const [error, setError] = useState<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
 
+  const otherId = userA === me ? userB : userA;
+
+  // Al abrir el chat y con cada mensaje que llega, la coincidencia queda vista (D-19).
+  useEffect(() => {
+    createClient().rpc("mark_match_seen", { other: otherId }).then(() => undefined);
+  }, [otherId, messages.length]);
+
   function add(message: Message) {
     setMessages((current) => (current.some((m) => m.id === message.id) ? current : [...current, message]));
   }

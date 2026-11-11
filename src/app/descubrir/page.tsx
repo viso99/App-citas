@@ -29,5 +29,6 @@ async function Discover() {
   if (!profile) redirect("/perfil");
   if (profile.lat === null) return <NeedsLocation />;
 
-  return <SwipeDeck initialCards={await loadCards(supabase)} />;
+  const [cards, { data: left }] = await Promise.all([loadCards(supabase), supabase.rpc("superlikes_left")]);
+  return <SwipeDeck initialCards={cards} initialSuperlikes={typeof left === "number" ? left : 0} />;
 }

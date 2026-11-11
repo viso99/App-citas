@@ -4,16 +4,17 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { SafetyMenu } from "@/components/safety/SafetyMenu";
 import { distanceLabel } from "@/lib/discover";
-import { nextCards, swipe } from "./actions";
+import { nextCards, superlike, swipe } from "./actions";
 import type { Card } from "./cards";
 
 const SWIPE_THRESHOLD = 100; // píxeles de arrastre para decidir
 const TAP_SLOP = 8; // menos que esto es un toque, no un arrastre
 
-type Choice = "me_gusta" | "paso";
+type Choice = "me_gusta" | "paso" | "superlike";
 
-export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
+export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: Card[]; initialSuperlikes: number }) {
   const [cards, setCards] = useState(initialCards);
+  const [superlikesLeft, setSuperlikesLeft] = useState(initialSuperlikes);
   const [photo, setPhoto] = useState(0);
   const [dx, setDx] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -47,6 +48,10 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
 
   function decide(choice: Choice) {
     if (!card || leaving) return;
+    if (choice === "superlike" && superlikesLeft < 1) {
+      setError("Ya has usado tu superlike de hoy. Mañana tendrás otro.");
+      return;
+    }
     const target = card;
     decided.current.add(target.id);
     setLeaving(choice);
@@ -57,6 +62,17 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
       setDx(0);
       setPhoto(0);
     }, 200);
+    if (choice === "superlike") {
+      setSuperlikesLeft(0);
+      superlike(target.id).then(({ ok, match, limit }) => {
+        if (limit) setError("Ya habías usado tu superlike de hoy, así que no se ha enviado.");
+        else if (!ok) {
+          setSuperlikesLeft(1);
+          setError("No pudimos enviar el superlike. Comprueba la conexión.");
+        } else if (match) setMatchWith(target);
+      });
+      return;
+    }
     swipe(target.id, choice).then(({ ok, match }) => {
       if (!ok) setError("No pudimos guardar tu respuesta. Comprueba la conexión.");
       else if (match) setMatchWith(target);
@@ -118,8 +134,10 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
     );
   }
 
-  const offset = leaving === "me_gusta" ? 600 : leaving === "paso" ? -600 : dx;
-  const hint = offset > TAP_SLOP * 4 ? "me_gusta" : offset < -TAP_SLOP * 4 ? "paso" : null;
+  const offset = leaving === "me_gusta" ? 600 : leaving === "paso" ? -600 : leaving === "superlike" ? 0 : dx;
+  const lift = leaving === "superlike" ? -800 : 0;
+  const hint: Choice | null =
+    leaving === "superlike" ? "superlike" : offset > TAP_SLOP * 4 ? "me_gusta" : offset < -TAP_SLOP * 4 ? "paso" : null;
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -138,11 +156,13 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
             setDx(0);
           }}
           style={{
-            transform: `translateX(${offset}px) rotate(${offset / 20}deg)`,
+            transform: `translate(${offset}px, ${lift}px) rotate(${offset / 20}deg)`,
             transition: dragging ? "none" : "transform 200ms ease-out",
             touchAction: "pan-y",
           }}
-          className="relative h-[calc(100dvh-15rem)] max-h-[640px] min-h-80 w-full select-none overflow-hidden rounded-3xl bg-zinc-200 shadow-lg"
+          className={`relative h-[calc(100dvh-15rem)] max-h-[640px] min-h-80 w-full select-none overflow-hidden rounded-3xl bg-zinc-200 shadow-lg ${
+            card.superlikedMe ? "ring-4 ring-sky-500" : ""
+          }`}
         >
           {card.photos[photo] && (
             // eslint-disable-next-line @next/next/no-img-element -- enlaces firmados y temporales
@@ -155,15 +175,22 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
               ))}
             </div>
           )}
+          {card.superlikedMe && (
+            <span className="absolute left-3 top-6 rounded-full bg-sky-500 px-3 py-1 text-sm font-semibold text-white shadow">
+              ★ Te ha dado un superlike
+            </span>
+          )}
           {hint && (
             <span
               className={`absolute top-8 rounded-lg border-4 px-3 py-1 text-2xl font-bold uppercase ${
                 hint === "me_gusta"
                   ? "left-6 -rotate-12 border-green-500 text-green-500"
-                  : "right-6 rotate-12 border-red-500 text-red-500"
+                  : hint === "paso"
+                    ? "right-6 rotate-12 border-red-500 text-red-500"
+                    : "inset-x-0 bottom-40 mx-auto w-fit border-sky-500 text-sky-500"
               }`}
             >
-              {hint === "me_gusta" ? "Me gusta" : "Paso"}
+              {hint === "me_gusta" ? "Me gusta" : hint === "paso" ? "Paso" : "Superlike"}
             </span>
           )}
           <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 to-transparent p-5 pt-16 text-white">
@@ -172,6 +199,21 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
             </p>
             <p className="text-sm text-white/80">{distanceLabel(card.distanceKm)}</p>
             {card.bio && <p className="line-clamp-3 text-white/90">{card.bio}</p>}
+            {card.interests.length > 0 && (
+              <ul className="mt-1 flex flex-wrap gap-1" aria-label="Aficiones">
+                {card.interests.map((i) => (
+                  <li
+                    key={i.key}
+                    className={`rounded-full px-2 py-0.5 text-xs ${
+                      i.shared ? "bg-rose-600 font-semibold text-white" : "bg-white/20 text-white"
+                    }`}
+                  >
+                    {i.label}
+                    {i.shared && <span className="sr-only"> (en común)</span>}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
         {!leaving && !dragging && (
@@ -185,7 +227,7 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
         )}
       </div>
 
-      <div className="flex justify-center gap-8">
+      <div className="flex items-center justify-center gap-6">
         <button
           type="button"
           onClick={() => decide("paso")}
@@ -194,6 +236,17 @@ export function SwipeDeck({ initialCards }: { initialCards: Card[] }) {
           className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-zinc-300 bg-white text-3xl text-zinc-500 shadow"
         >
           ✕
+        </button>
+        <button
+          type="button"
+          onClick={() => decide("superlike")}
+          disabled={Boolean(leaving)}
+          aria-label={superlikesLeft > 0 ? "Superlike (te queda 1 hoy)" : "Superlike (ya lo has usado hoy)"}
+          className={`flex h-12 w-12 items-center justify-center rounded-full text-2xl shadow ${
+            superlikesLeft > 0 ? "bg-sky-500 text-white" : "border-2 border-zinc-300 bg-white text-zinc-300"
+          }`}
+        >
+          ★
         </button>
         <button
           type="button"

@@ -49,6 +49,15 @@ export async function swipe(
   return { ok: !error, match: !error && data === true };
 }
 
+// El superlike del día (D-17). `ok: false` con `limit: true` si ya se usó hoy.
+export async function superlike(targetId: string): Promise<{ ok: boolean; match: boolean; limit: boolean }> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/entrar");
+  const { data, error } = await supabase.rpc("superlike", { target: targetId });
+  if (error) return { ok: false, match: false, limit: error.code === "23514" };
+  return { ok: true, match: data === true, limit: false };
+}
+
 export async function nextCards(): Promise<Card[]> {
   const { supabase, user } = await getUser();
   if (!user) redirect("/entrar");

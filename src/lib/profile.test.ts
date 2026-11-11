@@ -10,6 +10,7 @@ const valid: ProfileInput = {
   gender: "mujer",
   interestedIn: "hombres",
   sensitiveConsent: true,
+  interests: ["cine", "padel"],
 };
 
 describe("parseDate", () => {

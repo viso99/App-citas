@@ -79,3 +79,18 @@ La app se llama **Zuvi**: una palabra inventada, corta y fácil de decir.
 **D-16 · 2026-11-09 · vigente (provisional)**
 Los correos de acceso salen **por el Gmail de Sergio** (SMTP de Google con contraseña de aplicación) en vez del envío de prueba de Supabase, y vuelven a traer **código** (D-7).
 *Por qué:* Sergio eligió la opción recomendada: el envío de prueba de Supabase permite unos 2 correos por hora y no deja mandar código. Con Gmail es gratis y alcanza para probar. **Antes de abrir a gente real** se cambia por una dirección de zuvi.es con un servicio de correo (P-1), para no mostrar el correo personal de Sergio.
+
+**D-17 · 2026-11-11 · vigente** (amplía D-4)
+**Superlike:** un "me gusta" especial, **1 gratis al día** (el día cuenta en hora de la península). Quien lo recibe ve esa tarjeta **antes que las demás y marcada** con "★ Te ha dado un superlike". Por lo demás funciona como un "me gusta": si es mutuo, hay coincidencia.
+*Por qué:* Sergio eligió la opción recomendada: con uno al día sigue siendo especial y no hace falta cobrar nada (los pagos siguen fuera, P-8).
+Detalles técnicos (se pueden revisar): columna `super` en `swipes` y función `superlike()`, que comprueba el límite con un candado por persona. No se puede dar superlike a quien ya tiene tu "me gusta". En Descubrir es un botón azul con estrella entre "paso" y "me gusta" (sin gesto propio).
+
+**D-18 · 2026-11-11 · vigente**
+**Aficiones en el perfil:** se eligen **de una lista fija, hasta 5, opcionales**. Se muestran en la tarjeta de Descubrir y se destacan las que tenéis en común. La lista es **amplia** (62 en 6 grupos: deporte, música y baile, cultura, comida y bebida, viajes y naturaleza, ocio), como pidió Sergio.
+*Por qué:* Sergio eligió la opción recomendada: una lista fija permite mostrar lo que tenéis en común y no suma texto libre que moderar; opcional no frena el registro.
+Detalles técnicos (se pueden revisar): la lista vive en `src/lib/interests.ts` y es **una propuesta de Claude, a revisar por Sergio**. A propósito no incluye religión, política ni salud (datos de categoría especial del RGPD). La base guarda solo las claves en `profiles.interests` y comprueba formato, repetidas y el máximo.
+
+**D-19 · 2026-11-11 · vigente**
+**Aviso de novedades dentro de la app:** un punto en "Coincidencias" (barra de abajo) cuando hay una coincidencia que todavía no viste o un mensaje sin leer, y la etiqueta "Nuevo" en cada coincidencia de la lista. Se marca como vista al abrir el chat. Sin avisos fuera de la app (notificaciones del móvil).
+*Por qué:* Sergio eligió la opción recomendada entre varios extras: hasta ahora quien recibía la coincidencia no se enteraba, y se perdían conversaciones.
+Detalles técnicos (se pueden revisar): `matches.a_seen_at` y `b_seen_at`; funciones `mark_match_seen()`, `unread_matches_count()` y `my_matches()` con `unread`. Quien da el segundo "me gusta" ve el aviso en el momento, así que para esa persona la coincidencia ya cuenta como vista. Las coincidencias que existían antes del cambio aparecen como "Nuevo" una vez.

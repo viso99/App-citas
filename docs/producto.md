@@ -30,6 +30,14 @@ Tiene **nombre, marca y diseño propios**. "Como Tinder" describe el tipo de app
 
 **[Confirmado 2026-11-09]** Fuera de la primera versión: pagos y suscripciones, "superlikes", videollamadas y cualquier otra función. Se suman después según lo que digan los usuarios, y solo con el visto bueno de Sergio.
 
+## Después de la primera versión
+
+**[Confirmado 2026-11-11]** Sergio pidió sumar estos extras (los tres son gratis, sin pagos):
+
+1. **Superlike** (D-17): un "me gusta" especial, **1 al día**. Quien lo recibe ve esa tarjeta antes que las demás y marcada con "Te ha dado un superlike".
+2. **Aficiones** (D-18): al hacer el perfil se eligen **hasta 5 de una lista amplia** (unas 60, por grupos). Son opcionales. Se ven en la tarjeta y se destacan las que tenéis en común.
+3. **Aviso de novedades** (D-19): un punto en "Coincidencias" cuando hay una coincidencia nueva o un mensaje sin leer, y la etiqueta "Nuevo" en cada una.
+
 **[Confirmado 2026-11-09]** Registro con correo y código (D-7). El perfil lleva nombre de pila, fecha de nacimiento, de 2 a 6 fotos, descripción corta opcional, género y a quién quiere conocer (D-8).
 
 Los demás detalles (a qué distancia, a quién se le muestra cada perfil, cómo se verifica la edad, qué pasa al bloquear o denunciar) **no están definidos**. Están en [pendientes.md](pendientes.md). No los inventes: preguntale a Sergio o registralos como supuesto.
