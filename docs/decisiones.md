@@ -107,3 +107,25 @@ Detalles técnicos (se pueden revisar): no hace falta cambiar la base; se usa la
 - **Deshacer una coincidencia:** en el menú "⋯" del chat. Se borra la conversación y no os volvéis a ver en Descubrir. La otra persona no recibe aviso.
 *Por qué:* Sergio pidió las 10 funciones propuestas el 2026-11-11 ("Los haría todos"); este es el primer grupo. Los detalles y textos son propuesta de Claude, a revisar en el PR.
 Detalles técnicos (se pueden revisar): funciones `undo_pass()`, `my_blocks()`, `unblock_user()` y `unmatch()` (migración `20261111010000_control.sql`). Sin tablas nuevas.
+
+**D-22 · 2026-11-11 · vigente**
+**Chat más completo:**
+- **Leído:** bajo tu último mensaje pone "Enviado" o "Leído" (cuando la otra persona abrió el chat después). Se actualiza en el momento.
+- **Está escribiendo:** aparece "<nombre> está escribiendo…" mientras la otra persona escribe (desaparece a los 4 segundos sin teclear).
+- **Fotos en el chat:** botón 📷 para enviar una foto (JPG, PNG o WebP, hasta 5 MB). En la lista de coincidencias se ve "📷 Foto".
+*Por qué:* segundo grupo de las 10 funciones que pidió Sergio el 2026-11-11. Textos propuestos por Claude, a revisar en el PR.
+Detalles técnicos (se pueden revisar): "Leído" usa `matches.a_seen_at`/`b_seen_at` (D-19), con `matches` en Supabase Realtime. "Escribiendo" va por Realtime *broadcast* en el canal del chat, sin guardarse en la base; el nombre del canal lleva los dos ids, así que en la práctica no se puede adivinar, pero no está protegido por RLS (solo revela si alguien escribe). Las fotos van a un bucket privado `chat-photos`, carpeta `<user_a>_<user_b>/`, que solo pueden ver, subir y borrar las dos personas mientras la coincidencia existe. La app borra esas fotos **antes** de deshacer la coincidencia, bloquear, denunciar o borrar la cuenta (si no, quedarían huérfanas). No se pueden denunciar fotos sueltas: se denuncia a la persona.
+
+**D-23 · 2026-11-11 · vigente**
+**Perfil más completo:**
+- **Datos opcionales:** altura, trabajo, estudios, tabaco, alcohol e hijos. Se ven al tocar "Ver más" en la tarjeta.
+- **Preguntas:** hasta 3 de una lista de 15 ("Mi plan ideal de domingo es…"), con respuesta de hasta 150 caracteres.
+- **Filtros en Descubrir:** "Solo personas que no fuman", "Solo personas que quieren hijos" y "Solo perfiles verificados". Si un filtro está activo, solo sale quien lo indicó en su perfil.
+- **Perfil verificado:** en Perfil, la persona se hace un selfie imitando un gesto. **Lo revisa Sergio a mano en Supabase** (tabla `verifications`: completar `verified_at` o `rejected_at`, mirando el selfie en el bucket `verification-photos`). Si se aprueba, la tarjeta lleva "✔".
+*Por qué:* tercer grupo de las 10 funciones que pidió Sergio el 2026-11-11. Las listas y textos son propuesta de Claude, a revisar en el PR. A propósito no se pide religión, política, salud ni "qué busco" (podría revelar vida sexual): son categoría especial del RGPD.
+Detalles técnicos (se pueden revisar): columnas opcionales en `profiles` con sus opciones comprobadas en la base; `prompts` en JSON con `valid_prompts()`; la verificación vive en otra tabla que la app no puede escribir (solo `request_verification()`), así nadie se marca verificado a sí mismo. El selfie se borra al borrar la cuenta.
+
+**D-24 · 2026-11-11 · vigente**
+**Avisos en el móvil:** en Perfil, "Activar avisos". Avisa de una coincidencia nueva ("¡Tienes una coincidencia nueva!") y de un mensaje nuevo ("Tienes un mensaje nuevo."). **Sin nombres ni texto del mensaje**, porque se ven en la pantalla bloqueada. Al tocar el aviso se abre Coincidencias o el chat. En iPhone solo funciona si Zuvi está añadida a la pantalla de inicio (límite de Apple).
+*Por qué:* cuarto grupo de las 10 funciones que pidió Sergio el 2026-11-11; Claude lo recomendó como el más importante para que no se pierdan conversaciones.
+Detalles técnicos (se pueden revisar): avisos web estándar (Web Push con claves VAPID, gratis, sin servicios externos de pago) con el paquete `web-push` 3.6.7 y `public/sw.js`. Tabla `push_subscriptions` (cada uno ve y borra las suyas). El servidor de Next envía el aviso justo después del "me gusta" mutuo o del mensaje; para saber a dónde, usa `push_targets()`, que solo responde a quien acaba de provocar la coincidencia o escribir (2 minutos). Sin las variables `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_SUBJECT` en Vercel la app funciona igual pero no envía avisos.

@@ -6,6 +6,8 @@ import { PHOTOS_BUCKET } from "@/lib/supabase/config";
 import { getUser } from "@/lib/supabase/server";
 import { signOut } from "./actions";
 import { BlockedList } from "./BlockedList";
+import { Verification } from "./Verification";
+import { PushToggle } from "./PushToggle";
 import { DeleteAccount } from "./DeleteAccount";
 import { ProfileForm, type Photo } from "./ProfileForm";
 
@@ -23,6 +25,12 @@ export default function ProfilePage() {
         </div>
         <Suspense fallback={<p className="text-zinc-500">Cargando…</p>}>
           <Profile />
+        </Suspense>
+        <Suspense fallback={null}>
+          <Verification />
+        </Suspense>
+        <Suspense fallback={null}>
+          <Push />
         </Suspense>
         <Suspense fallback={null}>
           <BlockedList />
@@ -63,6 +71,22 @@ async function Profile() {
       initialPhotos={photos}
       hasProfile={Boolean(profile)}
       locationUpdatedAt={profile?.location_updated_at ?? null}
+      initialMore={{
+        extras: {
+          heightCm: profile?.height_cm ?? null,
+          job: profile?.job ?? "",
+          studies: profile?.studies ?? null,
+          smoking: profile?.smoking ?? null,
+          drinking: profile?.drinking ?? null,
+          children: profile?.children ?? null,
+        },
+        prompts: profile?.prompts ?? [],
+        filters: {
+          onlyNonSmokers: profile?.filter_non_smokers ?? false,
+          onlyWantsChildren: profile?.filter_wants_children ?? false,
+          onlyVerified: profile?.filter_verified ?? false,
+        },
+      }}
       initialPreferences={{
         minAge: profile?.min_age ?? DEFAULT_MIN_AGE,
         maxAge: profile?.max_age ?? DEFAULT_MAX_AGE,
@@ -79,4 +103,9 @@ async function Profile() {
       }}
     />
   );
+}
+
+async function Push() {
+  const { user } = await getUser();
+  return user ? <PushToggle userId={user.id} /> : null;
 }

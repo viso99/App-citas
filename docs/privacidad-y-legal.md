@@ -18,13 +18,13 @@
 Son decisiones técnicas tomadas por Claude (D-5), coherentes con lo de arriba. Se pueden revisar:
 
 1. **Datos en la UE:** base de datos y fotos alojadas en una región de la Unión Europea (D-6).
-2. **Mínimos datos:** no se pide ni se guarda nada que la primera versión no use. Cada dato nuevo del perfil se justifica. Las aficiones (D-18) son opcionales, de una lista fija, y la lista no incluye religión, política ni salud para no pedir datos de categoría especial.
+2. **Mínimos datos:** no se pide ni se guarda nada que la primera versión no use. Cada dato nuevo del perfil se justifica. Los datos de D-23 (altura, trabajo, estudios, tabaco, alcohol, hijos y preguntas) también son opcionales. El selfie de verificación es privado, solo lo ve quien revisa y se borra con la cuenta. Las aficiones (D-18) son opcionales, de una lista fija, y la lista no incluye religión, política ni salud para no pedir datos de categoría especial.
 3. **Ubicación aproximada:** se guarda una ubicación redondeada a unos 2 km (lo hace la base, no solo la app) y a otros usuarios solo se les muestra la distancia en km enteros, nunca la posición ni menos de 2 km (D-12). Quien no quiere compartir la ubicación del móvil puede elegir su ciudad.
 4. **Mayoría de edad:** se pide la fecha de nacimiento al registrarse y se rechaza a menores de 18. Cómo se verifica de verdad está pendiente (P-4).
 5. **Consentimiento explícito** para los datos sensibles (orientación, preferencias), separado de la aceptación de condiciones.
 6. **Borrar la cuenta borra los datos:** la persona puede eliminar su cuenta y sus datos desde la app (en Perfil, "Eliminar mi cuenta"). Se borran los archivos de fotos y, en cascada, todo lo demás. Qué pasa con las denuncias: S-3 en [pendientes.md](pendientes.md).
 7. **Fotos privadas por defecto en el almacenamiento:** solo las ve un usuario que tiene permiso de verlas, no cualquiera con el enlace.
-8. **Chat privado:** solo lo leen las dos personas que coincidieron. Las reglas de acceso se aplican en la base de datos, no solo en la pantalla.
+8. **Chat privado:** solo lo leen las dos personas que coincidieron. Las reglas de acceso se aplican en la base de datos, no solo en la pantalla. Las fotos del chat (D-22) van a un almacenamiento privado que solo ven esas dos personas, y se borran al deshacer la coincidencia, bloquear, denunciar o borrar la cuenta.
 9. **Bloquear** corta todo contacto en las dos direcciones. **Denunciar** guarda la denuncia para revisión y bloquea (D-14). Las denuncias no se ven desde la app: solo quien revisa, en Supabase.
 
 ## Antes de abrir la app a usuarios reales

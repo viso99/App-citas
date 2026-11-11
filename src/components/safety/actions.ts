@@ -1,7 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { isUuid } from "@/lib/chat";
+import { chatFolder, isUuid } from "@/lib/chat";
+import { removeChatPhotos } from "@/lib/supabase/chatPhotos";
 import { cleanDetails, isReportReason } from "@/lib/safety";
 import { getUser } from "@/lib/supabase/server";
 
@@ -10,6 +11,8 @@ export async function blockUser(targetId: string): Promise<{ ok: boolean }> {
   if (!isUuid(targetId)) return { ok: false };
   const { supabase, user } = await getUser();
   if (!user) redirect("/entrar");
+  // Primero las fotos del chat, si había (D-22). Bloquear sigue aunque falle: la seguridad va antes.
+  await removeChatPhotos(supabase, [chatFolder(user.id, targetId)]);
   const { error } = await supabase.rpc("block_user", { target: targetId });
   return { ok: !error };
 }
@@ -28,6 +31,7 @@ export async function unmatchUser(targetId: string): Promise<{ ok: boolean }> {
   if (!isUuid(targetId)) return { ok: false };
   const { supabase, user } = await getUser();
   if (!user) redirect("/entrar");
+  await removeChatPhotos(supabase, [chatFolder(user.id, targetId)]);
   const { error } = await supabase.rpc("unmatch", { other: targetId });
   return { ok: !error };
 }
@@ -38,6 +42,7 @@ export async function reportUser(targetId: string, reason: string, details?: str
   if (!isUuid(targetId) || !isReportReason(reason) || note === undefined) return { ok: false };
   const { supabase, user } = await getUser();
   if (!user) redirect("/entrar");
+  await removeChatPhotos(supabase, [chatFolder(user.id, targetId)]);
   const { error } = await supabase.rpc("report_user", { target: targetId, reason, details: note });
   return { ok: !error };
 }

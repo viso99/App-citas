@@ -29,10 +29,10 @@ async function Chat({ params }: { params: Promise<{ id: string }> }) {
   if (!other) redirect("/coincidencias");
 
   const { userA, userB } = pairOf(user.id, other.id);
-  const [{ data: rows }, signed] = await Promise.all([
+  const [{ data: rows }, signed, { data: match }] = await Promise.all([
     supabase
       .from("messages")
-      .select("id, sender_id, body, created_at")
+      .select("id, sender_id, body, image_path, created_at")
       .eq("user_a", userA)
       .eq("user_b", userB)
       .order("created_at", { ascending: false })
@@ -40,7 +40,10 @@ async function Chat({ params }: { params: Promise<{ id: string }> }) {
     other.photo_path
       ? supabase.storage.from(PHOTOS_BUCKET).createSignedUrl(other.photo_path, 3600)
       : Promise.resolve(null),
+    supabase.from("matches").select("a_seen_at, b_seen_at").eq("user_a", userA).eq("user_b", userB).maybeSingle(),
   ]);
+  // Cuándo abrió el chat la otra persona por última vez, para el "Leído" (D-22).
+  const otherSeenAt: string | null = (userA === user.id ? match?.b_seen_at : match?.a_seen_at) ?? null;
   const messages = ((rows ?? []) as Message[]).reverse();
 
   return (
@@ -56,7 +59,14 @@ async function Chat({ params }: { params: Promise<{ id: string }> }) {
         <h1 className="text-lg font-semibold">{other.first_name}</h1>
         <ChatSafety targetId={other.id} name={other.first_name} />
       </header>
-      <ChatRoom me={user.id} userA={userA} userB={userB} otherName={other.first_name} initialMessages={messages} />
+      <ChatRoom
+        me={user.id}
+        userA={userA}
+        userB={userB}
+        otherName={other.first_name}
+        initialMessages={messages}
+        initialOtherSeenAt={otherSeenAt}
+      />
     </div>
   );
 }

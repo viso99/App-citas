@@ -3,17 +3,35 @@
 import { redirect } from "next/navigation";
 import { validatePreferences, type PreferenceErrors, type Preferences } from "@/lib/discover";
 import { photoCountError, validateProfile, type ProfileErrors, type ProfileInput } from "@/lib/profile";
-import { PHOTOS_BUCKET } from "@/lib/supabase/config";
+import {
+  GESTURES,
+  validateExtras,
+  validatePrompts,
+  type Extras,
+  type ExtrasErrors,
+  type Filters,
+  type PromptAnswer,
+} from "@/lib/profileExtras";
+import { PHOTOS_BUCKET, VERIFICATION_BUCKET } from "@/lib/supabase/config";
+import { chatFolder } from "@/lib/chat";
+import { removeChatPhotos } from "@/lib/supabase/chatPhotos";
 import { getUser } from "@/lib/supabase/server";
 
-export type SaveResult = { ok: true } | { ok: false; errors: ProfileErrors & PreferenceErrors; message?: string };
+export type SaveResult =
+  | { ok: true }
+  | { ok: false; errors: ProfileErrors & PreferenceErrors & ExtrasErrors; message?: string };
 
-export async function saveProfile(input: ProfileInput, preferences: Preferences): Promise<SaveResult> {
+// Lo opcional del perfil (D-23): datos, preguntas y filtros de Descubrir.
+export type ProfileMore = { extras: Extras; prompts: PromptAnswer[]; filters: Filters };
+
+export async function saveProfile(input: ProfileInput, preferences: Preferences, more: ProfileMore): Promise<SaveResult> {
   const { supabase, user } = await getUser();
   if (!user) redirect("/entrar");
 
-  const errors = { ...validateProfile(input), ...validatePreferences(preferences) };
+  const errors = { ...validateProfile(input), ...validatePreferences(preferences), ...validateExtras(more.extras) };
   if (Object.keys(errors).length > 0) return { ok: false, errors };
+  const promptsError = validatePrompts(more.prompts);
+  if (promptsError) return { ok: false, errors: {}, message: promptsError };
 
   const { count, error: countError } = await supabase
     .from("profile_photos")
@@ -40,11 +58,30 @@ export async function saveProfile(input: ProfileInput, preferences: Preferences)
     max_age: preferences.maxAge,
     max_distance_km: preferences.maxDistanceKm,
     interests: input.interests,
+    prompts: more.prompts.map((p) => ({ key: p.key, answer: p.answer.trim() })),
+    height_cm: more.extras.heightCm,
+    job: more.extras.job.trim() || null,
+    studies: more.extras.studies,
+    smoking: more.extras.smoking,
+    drinking: more.extras.drinking,
+    children: more.extras.children,
+    filter_non_smokers: Boolean(more.filters.onlyNonSmokers),
+    filter_wants_children: Boolean(more.filters.onlyWantsChildren),
+    filter_verified: Boolean(more.filters.onlyVerified),
     // Se conserva la fecha del primer consentimiento.
     sensitive_data_consent_at: existing?.sensitive_data_consent_at ?? new Date().toISOString(),
   });
   if (error) return { ok: false, errors: {}, message: "No pudimos guardar el perfil. Inténtalo de nuevo." };
   return { ok: true };
+}
+
+// Pide la verificación con el selfie ya subido a su carpeta (D-23).
+export async function requestVerification(path: string, gesture: string): Promise<{ ok: boolean }> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/entrar");
+  if (!Object.prototype.hasOwnProperty.call(GESTURES, gesture) || !path.startsWith(`${user.id}/`)) return { ok: false };
+  const { error } = await supabase.rpc("request_verification", { path, gesture });
+  return { ok: !error };
 }
 
 export async function signOut() {
@@ -67,6 +104,21 @@ export async function deleteAccount(): Promise<{ ok: false }> {
     const { error } = await bucket.remove(files.map((f) => `${user.id}/${f.name}`));
     if (error) return { ok: false };
   }
+
+  // El selfie de verificación, si lo había (D-23).
+  const selfies = supabase.storage.from(VERIFICATION_BUCKET);
+  const { data: selfieFiles, error: selfieError } = await selfies.list(user.id, { limit: 100 });
+  if (selfieError) return { ok: false };
+  if (selfieFiles.length > 0) {
+    const { error } = await selfies.remove(selfieFiles.map((f) => `${user.id}/${f.name}`));
+    if (error) return { ok: false };
+  }
+
+  // Las fotos de sus chats (D-22), mientras las coincidencias existen.
+  const { data: matches, error: matchesError } = await supabase.rpc("my_matches");
+  if (matchesError) return { ok: false };
+  const folders = ((matches ?? []) as { id: string }[]).map((m) => chatFolder(user.id, m.id));
+  if (!(await removeChatPhotos(supabase, folders))) return { ok: false };
 
   const { error } = await supabase.rpc("delete_my_account");
   if (error) return { ok: false };

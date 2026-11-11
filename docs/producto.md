@@ -39,6 +39,9 @@ Tiene **nombre, marca y diseño propios**. "Como Tinder" describe el tipo de app
 3. **Aviso de novedades** (D-19): un punto en "Coincidencias" cuando hay una coincidencia nueva o un mensaje sin leer, y la etiqueta "Nuevo" en cada una.
 4. **Ordenar las fotos** (D-20): en el perfil, cada foto tiene flechas para moverla, y la primera, marcada "Principal", es la que se ve primero en la tarjeta y en Coincidencias.
 5. **Control** (D-21): deshacer el último "paso", ver y quitar bloqueos (en Perfil) y deshacer una coincidencia (en el chat).
+6. **Chat** (D-22): "Leído" o "Enviado" bajo tu último mensaje, "<nombre> está escribiendo…" y enviar fotos.
+7. **Perfil más completo** (D-23): datos opcionales (altura, trabajo, estudios, tabaco, alcohol, hijos), hasta 3 preguntas con respuesta corta, filtros en Descubrir (no fuma, quiere hijos, verificado) y perfil verificado con un selfie que revisa Sergio.
+8. **Avisos en el móvil** (D-24): cada persona puede activarlos en Perfil; avisan de coincidencias y mensajes nuevos sin enseñar nombres ni mensajes.
 
 **[Confirmado 2026-11-09]** Registro con correo y código (D-7). El perfil lleva nombre de pila, fecha de nacimiento, de 2 a 6 fotos, descripción corta opcional, género y a quién quiere conocer (D-8).
 

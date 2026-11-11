@@ -102,6 +102,18 @@ Migración `20261111010000_control.sql` (D-21): `undo_pass()` borra un "paso" pr
 
 **[Verificado 2026-11-11]** en el PostgreSQL local: deshacer un "paso" devuelve el perfil a Descubrir y no deshace un "me gusta"; la lista de bloqueos solo la ve quien bloqueó y desbloquear devuelve el perfil a Descubrir; quien fue bloqueado no puede quitar el bloqueo; deshacer coincidencia borra la coincidencia y sus mensajes; sin sesión no se pueden llamar.
 
+Migración `20261111020000_chat_extras.sql` (D-22): `matches` entra en Realtime (para el "Leído"); `messages.image_path` y el texto puede ir vacío si hay foto; bucket privado `chat-photos` con reglas basadas en `is_my_chat_folder()`; `my_matches()` muestra "📷 Foto". `src/lib/supabase/chatPhotos.ts` borra las fotos de un chat antes de que desaparezca la coincidencia.
+
+**[Verificado 2026-11-11]** en el PostgreSQL local, aplicando todas las migraciones desde cero: mensaje con solo foto aceptado; vacío sin foto rechazado; foto de otra carpeta rechazada; un tercero no tiene acceso a la carpeta del chat; la lista muestra "📷 Foto".
+
+Migración `20261111030000_perfil_extras.sql` (D-23): `profiles` suma `prompts` (JSON, `valid_prompts()`), `height_cm`, `job`, `studies`, `smoking`, `drinking`, `children` y los filtros `filter_non_smokers`, `filter_wants_children`, `filter_verified`. Tabla `verifications` (solo lectura propia; se escribe con `request_verification()`; quien revisa completa `verified_at` o `rejected_at`) y bucket privado `verification-photos`. `discover_profiles()` devuelve todo eso más `verified` y aplica los filtros. Listas y reglas en `src/lib/profileExtras.ts`.
+
+**[Verificado 2026-11-11]** en el PostgreSQL local: preguntas repetidas, con campos de más u opciones inventadas se rechazan; nadie puede escribir en `verifications` ni marcarse verificado; los filtros de no fumadores y verificados quitan a quien no cumple; quien revisa al marcar `verified_at` hace que salga la insignia; nadie ve verificaciones ajenas.
+
+Migración `20261111040000_avisos_movil.sql` (D-24): tabla `push_subscriptions` con RLS (cada uno las suyas); `push_targets(other, kind)` devuelve a dónde avisar a la otra persona solo si quien llama acaba de crear la coincidencia o escribir (2 minutos); `forget_push_endpoint()` borra direcciones caducadas. Envío desde `src/lib/supabase/sendPush.ts` (servidor), activación en `src/app/perfil/PushToggle.tsx`, textos en `src/lib/push.ts` y `public/sw.js` muestra el aviso.
+
+**[Verificado 2026-11-11]** en el PostgreSQL local: quien acaba de escribir obtiene las direcciones de la otra persona; pasados 2 minutos, quien no escribió o un tercero no obtiene nada; nadie ve ni crea direcciones ajenas.
+
 ## Reglas de arquitectura
 
 1. Las reglas críticas van **en la base** (RLS, triggers, CHECK) además de en la app. La app ayuda con mensajes claros; la base es la que protege.
