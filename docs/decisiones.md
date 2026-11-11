@@ -115,3 +115,12 @@ Detalles técnicos (se pueden revisar): funciones `undo_pass()`, `my_blocks()`, 
 - **Fotos en el chat:** botón 📷 para enviar una foto (JPG, PNG o WebP, hasta 5 MB). En la lista de coincidencias se ve "📷 Foto".
 *Por qué:* segundo grupo de las 10 funciones que pidió Sergio el 2026-11-11. Textos propuestos por Claude, a revisar en el PR.
 Detalles técnicos (se pueden revisar): "Leído" usa `matches.a_seen_at`/`b_seen_at` (D-19), con `matches` en Supabase Realtime. "Escribiendo" va por Realtime *broadcast* en el canal del chat, sin guardarse en la base; el nombre del canal lleva los dos ids, así que en la práctica no se puede adivinar, pero no está protegido por RLS (solo revela si alguien escribe). Las fotos van a un bucket privado `chat-photos`, carpeta `<user_a>_<user_b>/`, que solo pueden ver, subir y borrar las dos personas mientras la coincidencia existe. La app borra esas fotos **antes** de deshacer la coincidencia, bloquear, denunciar o borrar la cuenta (si no, quedarían huérfanas). No se pueden denunciar fotos sueltas: se denuncia a la persona.
+
+**D-23 · 2026-11-11 · vigente**
+**Perfil más completo:**
+- **Datos opcionales:** altura, trabajo, estudios, tabaco, alcohol e hijos. Se ven al tocar "Ver más" en la tarjeta.
+- **Preguntas:** hasta 3 de una lista de 15 ("Mi plan ideal de domingo es…"), con respuesta de hasta 150 caracteres.
+- **Filtros en Descubrir:** "Solo personas que no fuman", "Solo personas que quieren hijos" y "Solo perfiles verificados". Si un filtro está activo, solo sale quien lo indicó en su perfil.
+- **Perfil verificado:** en Perfil, la persona se hace un selfie imitando un gesto. **Lo revisa Sergio a mano en Supabase** (tabla `verifications`: completar `verified_at` o `rejected_at`, mirando el selfie en el bucket `verification-photos`). Si se aprueba, la tarjeta lleva "✔".
+*Por qué:* tercer grupo de las 10 funciones que pidió Sergio el 2026-11-11. Las listas y textos son propuesta de Claude, a revisar en el PR. A propósito no se pide religión, política, salud ni "qué busco" (podría revelar vida sexual): son categoría especial del RGPD.
+Detalles técnicos (se pueden revisar): columnas opcionales en `profiles` con sus opciones comprobadas en la base; `prompts` en JSON con `valid_prompts()`; la verificación vive en otra tabla que la app no puede escribir (solo `request_verification()`), así nadie se marca verificado a sí mismo. El selfie se borra al borrar la cuenta.

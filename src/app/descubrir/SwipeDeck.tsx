@@ -25,6 +25,7 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
   // El último perfil al que se le dio "paso", para poder deshacerlo (D-21).
   const [lastPassed, setLastPassed] = useState<{ card: Card; saved: Promise<unknown> } | null>(null);
   const [undoing, setUndoing] = useState(false);
+  const [showMore, setShowMore] = useState<Card | null>(null);
   const decided = useRef(new Set<string>());
   const loading = useRef(false);
   const start = useRef<{ x: number; y: number } | null>(null);
@@ -149,7 +150,12 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
     else setDx(0);
   }
 
-  const overlay = matchWith && <MatchOverlay card={matchWith} onClose={() => setMatchWith(null)} />;
+  const overlay = (
+    <>
+      {matchWith && <MatchOverlay card={matchWith} onClose={() => setMatchWith(null)} />}
+      {showMore && <MoreSheet card={showMore} onClose={() => setShowMore(null)} />}
+    </>
+  );
 
   if (!card) {
     return (
@@ -233,6 +239,11 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
           <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 to-transparent p-5 pt-16 text-white">
             <p className="text-2xl font-bold">
               {card.firstName}, {card.age}
+              {card.verified && (
+                <span className="ml-2 align-middle text-base text-sky-300" title="Perfil verificado">
+                  ✔<span className="sr-only"> Perfil verificado</span>
+                </span>
+              )}
             </p>
             <p className="text-sm text-white/80">{distanceLabel(card.distanceKm)}</p>
             {card.bio && <p className="line-clamp-3 text-white/90">{card.bio}</p>}
@@ -253,6 +264,15 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
             )}
           </div>
         </div>
+        {!leaving && !dragging && (
+          <button
+            type="button"
+            onClick={() => setShowMore(card)}
+            className="absolute right-3 top-20 rounded-full bg-black/40 px-3 py-1 text-sm font-semibold text-white"
+          >
+            Ver más
+          </button>
+        )}
         {!leaving && !dragging && (
           <SafetyMenu
             key={card.id}
@@ -297,6 +317,59 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
       </div>
       {undoButton}
       {error && <p className="text-center text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+// Todo el perfil: descripción, datos, preguntas y aficiones (D-23).
+function MoreSheet({ card, onClose }: { card: Card; onClose: () => void }) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Perfil de ${card.firstName}`}
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="flex max-h-[85dvh] w-full max-w-md flex-col gap-4 overflow-y-auto rounded-t-3xl bg-white p-6 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100">
+        <h2 className="text-2xl font-bold">
+          {card.firstName}, {card.age} {card.verified && <span className="text-base text-sky-600">✔ Verificado</span>}
+        </h2>
+        <p className="text-sm text-zinc-500">{distanceLabel(card.distanceKm)}</p>
+        {card.bio && <p className="whitespace-pre-wrap">{card.bio}</p>}
+        {card.details.length > 0 && (
+          <ul className="flex flex-wrap gap-2">
+            {card.details.map((d) => (
+              <li key={d} className="rounded-full bg-zinc-100 px-3 py-1 text-sm dark:bg-zinc-800">
+                {d}
+              </li>
+            ))}
+          </ul>
+        )}
+        {card.prompts.map((p) => (
+          <div key={p.question} className="rounded-2xl bg-zinc-100 p-4 dark:bg-zinc-800">
+            <p className="text-sm text-zinc-500">{p.question}</p>
+            <p className="text-lg font-semibold">{p.answer}</p>
+          </div>
+        ))}
+        {card.interests.length > 0 && (
+          <ul className="flex flex-wrap gap-2" aria-label="Aficiones">
+            {card.interests.map((i) => (
+              <li
+                key={i.key}
+                className={`rounded-full px-3 py-1 text-sm ${
+                  i.shared ? "bg-rose-600 font-semibold text-white" : "bg-zinc-100 dark:bg-zinc-800"
+                }`}
+              >
+                {i.label}
+              </li>
+            ))}
+          </ul>
+        )}
+        <button type="button" onClick={onClose} className="rounded-full bg-rose-600 px-6 py-3 font-semibold text-white">
+          Cerrar
+        </button>
+      </div>
     </div>
   );
 }

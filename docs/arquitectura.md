@@ -106,6 +106,10 @@ Migración `20261111020000_chat_extras.sql` (D-22): `matches` entra en Realtime 
 
 **[Verificado 2026-11-11]** en el PostgreSQL local, aplicando todas las migraciones desde cero: mensaje con solo foto aceptado; vacío sin foto rechazado; foto de otra carpeta rechazada; un tercero no tiene acceso a la carpeta del chat; la lista muestra "📷 Foto".
 
+Migración `20261111030000_perfil_extras.sql` (D-23): `profiles` suma `prompts` (JSON, `valid_prompts()`), `height_cm`, `job`, `studies`, `smoking`, `drinking`, `children` y los filtros `filter_non_smokers`, `filter_wants_children`, `filter_verified`. Tabla `verifications` (solo lectura propia; se escribe con `request_verification()`; quien revisa completa `verified_at` o `rejected_at`) y bucket privado `verification-photos`. `discover_profiles()` devuelve todo eso más `verified` y aplica los filtros. Listas y reglas en `src/lib/profileExtras.ts`.
+
+**[Verificado 2026-11-11]** en el PostgreSQL local: preguntas repetidas, con campos de más u opciones inventadas se rechazan; nadie puede escribir en `verifications` ni marcarse verificado; los filtros de no fumadores y verificados quitan a quien no cumple; quien revisa al marcar `verified_at` hace que salga la insignia; nadie ve verificaciones ajenas.
+
 ## Reglas de arquitectura
 
 1. Las reglas críticas van **en la base** (RLS, triggers, CHECK) además de en la app. La app ayuda con mensajes claros; la base es la que protege.

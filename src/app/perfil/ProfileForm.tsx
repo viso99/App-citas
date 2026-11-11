@@ -27,7 +27,9 @@ import {
 import { INTEREST_GROUPS, MAX_INTERESTS } from "@/lib/interests";
 import { createClient } from "@/lib/supabase/client";
 import { PHOTOS_BUCKET } from "@/lib/supabase/config";
-import { saveProfile } from "./actions";
+import { validateExtras, type ExtrasErrors } from "@/lib/profileExtras";
+import { saveProfile, type ProfileMore } from "./actions";
+import { DiscoverFilters, MoreAboutYou } from "./ProfileMoreFields";
 
 export type Photo = { id: string; path: string; url: string | null };
 
@@ -38,6 +40,7 @@ export function ProfileForm({
   initial,
   initialPhotos,
   initialPreferences,
+  initialMore,
   hasProfile,
   locationUpdatedAt,
 }: {
@@ -45,15 +48,17 @@ export function ProfileForm({
   initial: ProfileInput;
   initialPhotos: Photo[];
   initialPreferences: Preferences;
+  initialMore: ProfileMore;
   hasProfile: boolean;
   locationUpdatedAt: string | null;
 }) {
   const router = useRouter();
   const [values, setValues] = useState<ProfileInput>(initial);
   const [prefs, setPrefs] = useState<Preferences>(initialPreferences);
+  const [more, setMore] = useState<ProfileMore>(initialMore);
   const [locationSaved, setLocationSaved] = useState(Boolean(locationUpdatedAt));
   const [photos, setPhotos] = useState<Photo[]>(initialPhotos);
-  const [errors, setErrors] = useState<ProfileErrors & PreferenceErrors>({});
+  const [errors, setErrors] = useState<ProfileErrors & PreferenceErrors & ExtrasErrors>({});
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -138,11 +143,11 @@ export function ProfileForm({
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    const found = { ...validateProfile(values), ...validatePreferences(prefs) };
+    const found = { ...validateProfile(values), ...validatePreferences(prefs), ...validateExtras(more.extras) };
     setErrors(found);
     if (Object.keys(found).length > 0) return;
     setBusy(true);
-    const result = await saveProfile(values, prefs);
+    const result = await saveProfile(values, prefs, more);
     setBusy(false);
     if (result.ok) {
       setMessage({ text: "Perfil guardado.", ok: true });
@@ -304,6 +309,8 @@ export function ProfileForm({
         {fieldError("interests")}
       </fieldset>
 
+      <MoreAboutYou value={more} onChange={setMore} errors={errors} />
+
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 font-medium">Soy</legend>
         <div className="flex flex-wrap gap-2">
@@ -369,6 +376,7 @@ export function ProfileForm({
           />
         </label>
         {fieldError("maxDistanceKm")}
+        <DiscoverFilters value={more.filters} onChange={(filters) => setMore((m) => ({ ...m, filters }))} />
       </fieldset>
 
       {hasProfile && (

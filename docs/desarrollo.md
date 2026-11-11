@@ -43,6 +43,13 @@ En Supabase, **Table Editor → `reports`**: cada fila es una denuncia con quié
 - Para dar por revisada una denuncia, completá `reviewed_at` con la fecha y hora actual. Si el perfil estaba oculto y quedan menos de 3 sin revisar, vuelve a aparecer.
 - Los bloqueos están en `blocks`. Qué hacer con un perfil denunciado de verdad todavía no está decidido (P-5).
 
+## Revisar verificaciones (D-23)
+
+En Supabase, **Table Editor → `verifications`**: las filas con `verified_at` y `rejected_at` vacíos están pendientes. El selfie está en **Storage → `verification-photos`**, en la ruta `photo_path`; el gesto pedido está en `gesture` (lista en `src/lib/profileExtras.ts`). Compará el selfie con las fotos del perfil (`profile-photos/<user_id>/`).
+
+- Si coincide y hace el gesto: completá `verified_at` con la fecha y hora actual. La tarjeta pasa a llevar "✔".
+- Si no: completá `rejected_at`. La persona verá que no se pudo verificar y podrá enviar otro.
+
 ## Avisos para quien programe
 
 - **Next.js 16:** cambió respecto de versiones anteriores. Leé `AGENTS.md` y la guía en `node_modules/next/dist/docs/` antes de escribir código de Next. Por ejemplo: el "middleware" ahora se llama `src/proxy.ts`, y con `cacheComponents` todo lo que lee la sesión tiene que estar dentro de un `<Suspense>`.

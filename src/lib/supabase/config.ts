@@ -15,3 +15,5 @@ export function supabaseConfig() {
 export const PHOTOS_BUCKET = "profile-photos";
 // Fotos del chat (D-22): carpeta <user_a>_<user_b>/ por coincidencia.
 export const CHAT_PHOTOS_BUCKET = "chat-photos";
+// Selfies para verificar el perfil (D-23): carpeta <id>/.
+export const VERIFICATION_BUCKET = "verification-photos";
