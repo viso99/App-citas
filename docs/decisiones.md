@@ -94,3 +94,8 @@ Detalles técnicos (se pueden revisar): la lista vive en `src/lib/interests.ts` 
 **Aviso de novedades dentro de la app:** un punto en "Coincidencias" (barra de abajo) cuando hay una coincidencia que todavía no viste o un mensaje sin leer, y la etiqueta "Nuevo" en cada coincidencia de la lista. Se marca como vista al abrir el chat. Sin avisos fuera de la app (notificaciones del móvil).
 *Por qué:* Sergio eligió la opción recomendada entre varios extras: hasta ahora quien recibía la coincidencia no se enteraba, y se perdían conversaciones.
 Detalles técnicos (se pueden revisar): `matches.a_seen_at` y `b_seen_at`; funciones `mark_match_seen()`, `unread_matches_count()` y `my_matches()` con `unread`. Quien da el segundo "me gusta" ve el aviso en el momento, así que para esa persona la coincidencia ya cuenta como vista. Las coincidencias que existían antes del cambio aparecen como "Nuevo" una vez.
+
+**D-20 · 2026-11-11 · vigente**
+**Ordenar las fotos del perfil:** cada foto tiene flechas para moverla antes o después, y la primera lleva la etiqueta "Principal": es la que se ve primero en Descubrir y la que sale en Coincidencias y en el chat.
+*Por qué:* Sergio eligió la opción recomendada entre varios extras: la primera foto es lo que más decide un "me gusta" y hasta ahora no se podía elegir.
+Detalles técnicos (se pueden revisar): no hace falta cambiar la base; se usa la columna `position` de `profile_photos`, que cada uno ya podía cambiar en sus fotos (RLS). Al mover o quitar una foto, la app renumera todas desde 0. Flechas en vez de arrastrar porque en el móvil arrastrar choca con el desplazamiento de la página.

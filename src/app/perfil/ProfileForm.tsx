@@ -18,6 +18,7 @@ import {
   INTERESTED_IN,
   MAX_PHOTOS,
   MIN_PHOTOS,
+  moveItem,
   validatePhoto,
   validateProfile,
   type ProfileErrors,
@@ -96,13 +97,39 @@ export function ProfileForm({
     setBusy(false);
   }
 
+  // Guarda el orden: la posición de cada foto es su lugar en la lista (la primera es la principal).
+  async function savePositions(list: Photo[]) {
+    const supabase = createClient();
+    const results = await Promise.all(
+      list.map((p, position) => supabase.from("profile_photos").update({ position }).eq("id", p.id)),
+    );
+    return results.every((r) => !r.error);
+  }
+
+  async function movePhoto(from: number, to: number) {
+    if (to < 0 || to >= photos.length) return;
+    const before = photos;
+    const after = moveItem(photos, from, to);
+    setBusy(true);
+    setMessage(null);
+    setPhotos(after);
+    if (!(await savePositions(after))) {
+      setPhotos(before);
+      await savePositions(before);
+      setMessage({ text: "No pudimos cambiar el orden de las fotos.", ok: false });
+    }
+    setBusy(false);
+  }
+
   async function removePhoto(photo: Photo) {
     setBusy(true);
     const supabase = createClient();
     const { error } = await supabase.from("profile_photos").delete().eq("id", photo.id);
     if (!error) {
       await supabase.storage.from(PHOTOS_BUCKET).remove([photo.path]);
-      setPhotos((p) => p.filter((x) => x.id !== photo.id));
+      const rest = photos.filter((x) => x.id !== photo.id);
+      setPhotos(rest);
+      await savePositions(rest);
     } else {
       setMessage({ text: "No pudimos quitar la foto.", ok: false });
     }
@@ -139,8 +166,11 @@ export function ProfileForm({
         <span className="font-medium">
           Fotos ({photos.length} de {MAX_PHOTOS}, mínimo {MIN_PHOTOS})
         </span>
+        {photos.length > 1 && (
+          <span className="text-sm text-zinc-500">La primera es la que se ve primero. Usa las flechas para cambiar el orden.</span>
+        )}
         <div className="grid grid-cols-3 gap-2">
-          {photos.map((photo) => (
+          {photos.map((photo, index) => (
             <div key={photo.id} className="relative aspect-[3/4] overflow-hidden rounded-xl bg-zinc-200">
               {photo.url && (
                 // eslint-disable-next-line @next/next/no-img-element -- enlaces firmados y temporales
@@ -155,6 +185,33 @@ export function ProfileForm({
               >
                 ×
               </button>
+              {index === 0 && (
+                <span className="absolute left-1 top-1 rounded-full bg-rose-600 px-2 py-0.5 text-xs font-semibold text-white">
+                  Principal
+                </span>
+              )}
+              {photos.length > 1 && (
+                <div className="absolute inset-x-1 bottom-1 flex justify-between">
+                  <button
+                    type="button"
+                    onClick={() => movePhoto(index, index - 1)}
+                    disabled={busy || index === 0}
+                    aria-label="Mover la foto antes"
+                    className="h-8 w-8 rounded-full bg-black/60 text-white disabled:invisible"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => movePhoto(index, index + 1)}
+                    disabled={busy || index === photos.length - 1}
+                    aria-label="Mover la foto después"
+                    className="h-8 w-8 rounded-full bg-black/60 text-white disabled:invisible"
+                  >
+                    ›
+                  </button>
+                </div>
+              )}
             </div>
           ))}
           {photos.length < MAX_PHOTOS && (

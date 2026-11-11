@@ -30,7 +30,7 @@
 | `src/lib/interests.ts` | Lista de aficiones por grupos (D-18), máximo 5, validación y orden para la tarjeta (las comunes primero). Pruebas en `interests.test.ts` |
 | `src/lib/chat.ts` | Reglas del chat sin dependencias: largo máximo, orden de la pareja (`pairOf`). Pruebas en `chat.test.ts` |
 | `src/components/` | `LocationSetter.tsx` (ubicación del móvil o ciudad) y `AppNav.tsx` (barra de abajo: Descubrir, Coincidencias y Perfil) |
-| `src/app/perfil/` | Pantalla del perfil: `page.tsx` carga datos y fotos (enlaces firmados de 1 hora), `ProfileForm.tsx` es el formulario (fotos, datos, qué perfiles quiere ver y ubicación), `actions.ts` guarda el perfil y cierra sesión |
+| `src/app/perfil/` | Pantalla del perfil: `page.tsx` carga datos y fotos (enlaces firmados de 1 hora), `ProfileForm.tsx` es el formulario (fotos con su orden, datos, aficiones, qué perfiles quiere ver y ubicación), `actions.ts` guarda el perfil y cierra sesión |
 | `src/app/manifest.ts` | Permite añadir la web a la pantalla de inicio del móvil |
 
 ## Base de datos

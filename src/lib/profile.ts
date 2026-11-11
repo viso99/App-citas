@@ -96,6 +96,16 @@ export function validatePhoto(file: { size: number; type: string }): string | nu
   return null;
 }
 
+// Devuelve una copia de la lista con el elemento `from` movido a la posición `to`.
+// Si alguna posición no existe, devuelve la lista igual.
+export function moveItem<T>(list: readonly T[], from: number, to: number): T[] {
+  const copy = [...list];
+  if (from === to || from < 0 || to < 0 || from >= copy.length || to >= copy.length) return copy;
+  const [item] = copy.splice(from, 1);
+  copy.splice(to, 0, item);
+  return copy;
+}
+
 export function photoCountError(count: number): string | null {
   if (count < MIN_PHOTOS) return `Sube al menos ${MIN_PHOTOS} fotos.`;
   if (count > MAX_PHOTOS) return `Puedes tener como máximo ${MAX_PHOTOS} fotos.`;

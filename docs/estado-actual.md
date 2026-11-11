@@ -20,12 +20,12 @@ Qué hay **realmente** en el repo. No es lo que el producto debe hacer: eso est�
 |---|---|
 | Superlike (D-17) | **Hecho en código, sin probar con gente real.** Botón ★ en Descubrir, 1 al día. Quien lo recibe ve la tarjeta primero, con borde azul y "★ Te ha dado un superlike" |
 | Aficiones (D-18) | **Hecho en código, sin probar con gente real.** En el perfil, hasta 5 de 62 por grupos. En la tarjeta, las comunes primero y en color |
+| Ordenar las fotos (D-20) | **Hecho en código (rama `claude/project-thread-ss52zm`), sin probar con gente real.** Flechas en cada foto del perfil; la primera lleva "Principal" |
 | Aviso de novedades (D-19) | **Hecho en código, sin probar con gente real.** Punto en "Coincidencias" y etiqueta "Nuevo"; se marca como visto al abrir el chat. No hay notificaciones fuera de la app |
 
 ## Límites conocidos
 
 - La app se llama **Zuvi** (D-15), pero todavía no tiene dominio, logo ni ícono propios (P-1).
-- Las fotos no se pueden reordenar: quedan en el orden en que se subieron.
 - La coincidencia se avisa en el momento a quien da el segundo "me gusta"; la otra persona la ve con el punto de novedades cuando abre la app (no hay notificaciones del móvil).
 - No se puede deshacer un "paso" ni un "me gusta", ni quitar un bloqueo.
 - Los correos de acceso salen provisionalmente por el Gmail de Sergio (D-16), con un límite de 30 por hora. Si se pasa, la app pide esperar un rato. Antes de abrir a gente real hay que pasarlos a una dirección de zuvi.es.
