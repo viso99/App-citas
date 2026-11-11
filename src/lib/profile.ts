@@ -2,6 +2,8 @@
 // el servidor y las pruebas. La base de datos repite las reglas críticas (edad, largos,
 // máximo de fotos) para que no dependan solo de este código.
 
+import { validateInterests } from "./interests";
+
 export const MIN_AGE = 18;
 export const FIRST_NAME_MAX = 40;
 export const BIO_MAX = 500;
@@ -32,6 +34,8 @@ export type ProfileInput = {
   gender: string;
   interestedIn: string;
   sensitiveConsent: boolean;
+  // Claves de src/lib/interests.ts, hasta 5 (D-18). Opcional.
+  interests: string[];
 };
 
 export type ProfileErrors = Partial<Record<keyof ProfileInput, string>>;
@@ -75,6 +79,9 @@ export function validateProfile(input: ProfileInput, today: Date = new Date()): 
 
   if (!(input.gender in GENDERS)) errors.gender = "Elige una opción.";
   if (!(input.interestedIn in INTERESTED_IN)) errors.interestedIn = "Elige una opción.";
+
+  const interestsError = validateInterests(input.interests);
+  if (interestsError) errors.interests = interestsError;
 
   if (!input.sensitiveConsent) {
     errors.sensitiveConsent = "Necesitamos tu consentimiento para guardar estos datos.";

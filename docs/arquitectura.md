@@ -27,6 +27,7 @@
 | `src/app/descubrir/` | `page.tsx` manda al perfil si no existe, pide la ubicación si falta y si no muestra las tarjetas. `cards.ts` trae los perfiles (función `discover_profiles`) y firma sus fotos. `SwipeDeck.tsx` es el mazo (deslizar, botones, tocar para cambiar de foto). `actions.ts`: guardar ubicación, buscar ciudades, deslizar (dice si hubo coincidencia), pedir más perfiles |
 | `src/app/coincidencias/page.tsx` | Lista de coincidencias (función `my_matches`) con la primera foto firmada y el último mensaje; cada una abre su chat |
 | `src/app/chat/[id]/` | `page.tsx` comprueba que haya coincidencia y carga los últimos 200 mensajes; `ChatRoom.tsx` los muestra, envía (insert directo, protegido por RLS) y recibe los nuevos con Supabase Realtime |
+| `src/lib/interests.ts` | Lista de aficiones por grupos (D-18), máximo 5, validación y orden para la tarjeta (las comunes primero). Pruebas en `interests.test.ts` |
 | `src/lib/chat.ts` | Reglas del chat sin dependencias: largo máximo, orden de la pareja (`pairOf`). Pruebas en `chat.test.ts` |
 | `src/components/` | `LocationSetter.tsx` (ubicación del móvil o ciudad) y `AppNav.tsx` (barra de abajo: Descubrir, Coincidencias y Perfil) |
 | `src/app/perfil/` | Pantalla del perfil: `page.tsx` carga datos y fotos (enlaces firmados de 1 hora), `ProfileForm.tsx` es el formulario (fotos, datos, qué perfiles quiere ver y ubicación), `actions.ts` guarda el perfil y cierra sesión |
@@ -87,6 +88,15 @@ Migración `20261109050000_borrar_cuenta.sql`:
 - La acción `deleteAccount` (`src/app/perfil/actions.ts`) primero borra los archivos de su carpeta con la API de almacenamiento (Supabase no deja borrarlos desde SQL), después llama a la función y cierra la sesión.
 
 **[Verificado 2026-11-09]** en el PostgreSQL local: borra todo lo de esa persona y nada de las demás; sin sesión no se puede llamar.
+
+Migración `20261111000000_superlike_aficiones_avisos.sql` (D-17, D-18, D-19):
+
+- `profiles.interests`: claves de aficiones (lista en `src/lib/interests.ts`). La base comprueba formato, repetidas y máximo 5 (`valid_interests`).
+- `swipes.super`: el "me gusta" fue un superlike. `superlike()` lo da (1 al día de la península, `superlikes_left()` dice cuántos quedan). `swipe()` y `superlike()` comparten la función interna `record_swipe()`.
+- `discover_profiles()` suma `interests`, `shared_interests` y `superliked_me`, y pone primero a quien te dio superlike.
+- `matches.a_seen_at` / `b_seen_at`: cuándo vio cada uno la coincidencia. `mark_match_seen()` la marca (la llama el chat al abrirse y con cada mensaje), `unread_matches_count()` alimenta el punto de `AppNav` y `my_matches()` suma `unread`.
+
+**[Verificado 2026-11-11]** en el PostgreSQL local: aficiones de más, repetidas o con formato raro se rechazan; el segundo superlike del día y el superlike a quien ya te gusta se rechazan; quien recibe el superlike lo ve primero y marcado, con las aficiones comunes; la coincidencia queda vista para quien da el segundo "me gusta" y nueva para el otro; un mensaje propio no genera novedad y uno ajeno sí, hasta abrir el chat; nadie puede marcar vistas ajenas ni llamar a `record_swipe()`; sin sesión no se pueden llamar.
 
 ## Reglas de arquitectura
 

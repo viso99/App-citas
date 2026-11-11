@@ -1,5 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { interestChips } from "@/lib/interests";
 import { PHOTOS_BUCKET } from "@/lib/supabase/config";
 
 export type Card = {
@@ -9,6 +10,10 @@ export type Card = {
   bio: string;
   distanceKm: number;
   photos: string[];
+  // Aficiones del perfil, primero las que tenéis en común (D-18).
+  interests: { key: string; label: string; shared: boolean }[];
+  // Este perfil te dio un superlike (D-17).
+  superlikedMe: boolean;
 };
 
 type Row = {
@@ -18,6 +23,9 @@ type Row = {
   bio: string;
   distance_km: number;
   photo_paths: string[];
+  interests: string[];
+  shared_interests: string[];
+  superliked_me: boolean;
 };
 
 // Los próximos perfiles de Descubrir, con sus fotos como enlaces firmados de una hora.
@@ -39,5 +47,7 @@ export async function loadCards(supabase: SupabaseClient): Promise<Card[]> {
     bio: r.bio,
     distanceKm: r.distance_km,
     photos: r.photo_paths.map((p) => urls.get(p)).filter((u): u is string => Boolean(u)),
+    interests: interestChips(r.interests ?? [], r.shared_interests ?? []),
+    superlikedMe: r.superliked_me === true,
   }));
 }

@@ -27,6 +27,7 @@ type Row = {
   matched_at: string;
   last_message: string | null;
   last_message_mine: boolean | null;
+  unread: boolean;
 };
 
 const dateFormat = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "long", timeZone: "Europe/Madrid" });
@@ -74,6 +75,11 @@ async function Matches() {
               {url && (
                 // eslint-disable-next-line @next/next/no-img-element -- enlaces firmados y temporales
                 <img src={url} alt="" className="h-full w-full object-cover" />
+              )}
+              {r.unread && (
+                <span className="absolute right-2 top-2 rounded-full bg-rose-600 px-2 py-0.5 text-xs font-semibold text-white shadow">
+                  Nuevo
+                </span>
               )}
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-10 text-white">
                 <p className="font-semibold">

@@ -23,6 +23,7 @@ import {
   type ProfileErrors,
   type ProfileInput,
 } from "@/lib/profile";
+import { INTEREST_GROUPS, MAX_INTERESTS } from "@/lib/interests";
 import { createClient } from "@/lib/supabase/client";
 import { PHOTOS_BUCKET } from "@/lib/supabase/config";
 import { saveProfile } from "./actions";
@@ -57,6 +58,14 @@ export function ProfileForm({
 
   function set<K extends keyof ProfileInput>(key: K, value: ProfileInput[K]) {
     setValues((v) => ({ ...v, [key]: value }));
+  }
+
+  function toggleInterest(key: string) {
+    setValues((v) => {
+      if (v.interests.includes(key)) return { ...v, interests: v.interests.filter((k) => k !== key) };
+      if (v.interests.length >= MAX_INTERESTS) return v;
+      return { ...v, interests: [...v.interests, key] };
+    });
   }
 
   async function addPhoto(file: File) {
@@ -198,6 +207,45 @@ export function ProfileForm({
         </span>
         {fieldError("bio")}
       </label>
+
+      <fieldset className="flex flex-col gap-3">
+        <legend className="mb-1 font-medium">
+          Aficiones (opcional, hasta {MAX_INTERESTS}: llevas {values.interests.length})
+        </legend>
+        {INTEREST_GROUPS.map((group) => (
+          <div key={group.name} className="flex flex-col gap-2">
+            <span className="text-sm text-zinc-500">{group.name}</span>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(group.items).map(([key, label]) => {
+                const checked = values.interests.includes(key);
+                const full = !checked && values.interests.length >= MAX_INTERESTS;
+                return (
+                  <label
+                    key={key}
+                    className={`rounded-full border px-3 py-1.5 text-sm ${
+                      checked
+                        ? "border-rose-600 bg-rose-600 text-white"
+                        : full
+                          ? "cursor-not-allowed border-zinc-200 text-zinc-400"
+                          : "cursor-pointer border-zinc-300"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      disabled={full}
+                      onChange={() => toggleInterest(key)}
+                      className="sr-only"
+                    />
+                    {label}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+        {fieldError("interests")}
+      </fieldset>
 
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 font-medium">Soy</legend>

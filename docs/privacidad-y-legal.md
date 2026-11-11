@@ -18,7 +18,7 @@
 Son decisiones técnicas tomadas por Claude (D-5), coherentes con lo de arriba. Se pueden revisar:
 
 1. **Datos en la UE:** base de datos y fotos alojadas en una región de la Unión Europea (D-6).
-2. **Mínimos datos:** no se pide ni se guarda nada que la primera versión no use. Cada dato nuevo del perfil se justifica.
+2. **Mínimos datos:** no se pide ni se guarda nada que la primera versión no use. Cada dato nuevo del perfil se justifica. Las aficiones (D-18) son opcionales, de una lista fija, y la lista no incluye religión, política ni salud para no pedir datos de categoría especial.
 3. **Ubicación aproximada:** se guarda una ubicación redondeada a unos 2 km (lo hace la base, no solo la app) y a otros usuarios solo se les muestra la distancia en km enteros, nunca la posición ni menos de 2 km (D-12). Quien no quiere compartir la ubicación del móvil puede elegir su ciudad.
 4. **Mayoría de edad:** se pide la fecha de nacimiento al registrarse y se rechaza a menores de 18. Cómo se verifica de verdad está pendiente (P-4).
 5. **Consentimiento explícito** para los datos sensibles (orientación, preferencias), separado de la aceptación de condiciones.
