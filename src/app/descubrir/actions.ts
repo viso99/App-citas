@@ -58,6 +58,14 @@ export async function superlike(targetId: string): Promise<{ ok: boolean; match:
   return { ok: true, match: data === true, limit: false };
 }
 
+// Deshace un "paso" (D-21): el perfil vuelve a la cola.
+export async function undoPass(targetId: string): Promise<{ ok: boolean }> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/entrar");
+  const { data, error } = await supabase.rpc("undo_pass", { target: targetId });
+  return { ok: !error && data === true };
+}
+
 export async function nextCards(): Promise<Card[]> {
   const { supabase, user } = await getUser();
   if (!user) redirect("/entrar");

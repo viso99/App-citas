@@ -99,3 +99,11 @@ Detalles técnicos (se pueden revisar): `matches.a_seen_at` y `b_seen_at`; funci
 **Ordenar las fotos del perfil:** cada foto tiene flechas para moverla antes o después, y la primera lleva la etiqueta "Principal": es la que se ve primero en Descubrir y la que sale en Coincidencias y en el chat.
 *Por qué:* Sergio eligió la opción recomendada entre varios extras: la primera foto es lo que más decide un "me gusta" y hasta ahora no se podía elegir.
 Detalles técnicos (se pueden revisar): no hace falta cambiar la base; se usa la columna `position` de `profile_photos`, que cada uno ya podía cambiar en sus fotos (RLS). Al mover o quitar una foto, la app renumera todas desde 0. Flechas en vez de arrastrar porque en el móvil arrastrar choca con el desplazamiento de la página.
+
+**D-21 · 2026-11-11 · vigente**
+**Control para cada persona:**
+- **Deshacer el último "paso":** en Descubrir aparece "↶ Deshacer el paso a <nombre>" y la tarjeta vuelve. Solo el último y solo "paso" (un "me gusta" no se deshace). Gratis.
+- **Ver y quitar bloqueos:** en Perfil, "Personas bloqueadas" con "Desbloquear". La conversación borrada no vuelve; las denuncias se quedan para revisión.
+- **Deshacer una coincidencia:** en el menú "⋯" del chat. Se borra la conversación y no os volvéis a ver en Descubrir. La otra persona no recibe aviso.
+*Por qué:* Sergio pidió las 10 funciones propuestas el 2026-11-11 ("Los haría todos"); este es el primer grupo. Los detalles y textos son propuesta de Claude, a revisar en el PR.
+Detalles técnicos (se pueden revisar): funciones `undo_pass()`, `my_blocks()`, `unblock_user()` y `unmatch()` (migración `20261111010000_control.sql`). Sin tablas nuevas.
