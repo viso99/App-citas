@@ -34,7 +34,8 @@ export function AppNav({ current }: { current: "descubrir" | "coincidencias" | "
 async function UnreadDot() {
   const { supabase, user } = await getUser();
   if (!user) return null;
-  const { data } = await supabase.rpc("unread_matches_count");
+  // De paso apunta que la persona usa la app, para "Activo hace poco" (D-28).
+  const [{ data }] = await Promise.all([supabase.rpc("unread_matches_count"), supabase.rpc("touch_activity")]);
   if (typeof data !== "number" || data < 1) return null;
   return (
     <>

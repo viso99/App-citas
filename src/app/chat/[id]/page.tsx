@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { isUuid, pairOf } from "@/lib/chat";
+import { isUuid, MESSAGE_COLUMNS, pairOf } from "@/lib/chat";
 import { PHOTOS_BUCKET } from "@/lib/supabase/config";
 import { getUser } from "@/lib/supabase/server";
+import { icebreakers } from "@/lib/icebreakers";
+import type { PromptAnswer } from "@/lib/profileExtras";
 import { ChatRoom, type Message } from "./ChatRoom";
 import { ChatSafety } from "./ChatSafety";
 
@@ -29,10 +31,10 @@ async function Chat({ params }: { params: Promise<{ id: string }> }) {
   if (!other) redirect("/coincidencias");
 
   const { userA, userB } = pairOf(user.id, other.id);
-  const [{ data: rows }, signed, { data: match }] = await Promise.all([
+  const [{ data: rows }, signed, { data: match }, { data: info }] = await Promise.all([
     supabase
       .from("messages")
-      .select("id, sender_id, body, image_path, created_at")
+      .select(MESSAGE_COLUMNS)
       .eq("user_a", userA)
       .eq("user_b", userB)
       .order("created_at", { ascending: false })
@@ -41,7 +43,13 @@ async function Chat({ params }: { params: Promise<{ id: string }> }) {
       ? supabase.storage.from(PHOTOS_BUCKET).createSignedUrl(other.photo_path, 3600)
       : Promise.resolve(null),
     supabase.from("matches").select("a_seen_at, b_seen_at").eq("user_a", userA).eq("user_b", userB).maybeSingle(),
+    // Para las ideas del primer mensaje (D-29).
+    supabase.rpc("icebreaker_info", { other: other.id }),
+    // Chatear también cuenta para "Activo hace poco" (D-28).
+    supabase.rpc("touch_activity"),
   ]);
+  const shared = ((info ?? []) as { shared_interests: string[] | null; prompts: PromptAnswer[] | null }[])[0];
+  const ideas = icebreakers(shared?.shared_interests ?? [], shared?.prompts ?? []);
   // Cuándo abrió el chat la otra persona por última vez, para el "Leído" (D-22).
   const otherSeenAt: string | null = (userA === user.id ? match?.b_seen_at : match?.a_seen_at) ?? null;
   const messages = ((rows ?? []) as Message[]).reverse();
@@ -66,6 +74,7 @@ async function Chat({ params }: { params: Promise<{ id: string }> }) {
         otherName={other.first_name}
         initialMessages={messages}
         initialOtherSeenAt={otherSeenAt}
+        ideas={ideas}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chatFolder, cleanMessage, isRead, isUuid, MESSAGE_MAX, pairOf } from "./chat";
+import { audioType, chatFolder, cleanMessage, cleanNote, formatSeconds, isRead, isUuid, MESSAGE_MAX, NOTE_MAX, pairOf } from "./chat";
 
 const a = "00000000-0000-0000-0000-00000000000a";
 const b = "00000000-0000-0000-0000-00000000000b";
@@ -42,5 +42,24 @@ describe("isRead", () => {
     expect(isRead("2026-11-11T10:00:00Z", "2026-11-11T09:59:59Z")).toBe(false);
     expect(isRead("2026-11-11T10:00:00Z", "2026-11-11T10:00:00Z")).toBe(true);
     expect(isRead("2026-11-11T10:00:00Z", "2026-11-11T10:05:00+01:00")).toBe(false);
+  });
+});
+
+describe("notas de voz y me gusta con mensaje", () => {
+  it("reconoce los tipos de audio del navegador", () => {
+    expect(audioType("audio/webm;codecs=opus")).toEqual({ type: "audio/webm", ext: "webm" });
+    expect(audioType("audio/mp4")).toEqual({ type: "audio/mp4", ext: "m4a" });
+    expect(audioType("video/mp4")).toBeNull();
+  });
+
+  it("formatea los segundos", () => {
+    expect(formatSeconds(7)).toBe("0:07");
+    expect(formatSeconds(60)).toBe("1:00");
+  });
+
+  it("limpia el mensaje del me gusta", () => {
+    expect(cleanNote("  hola ")).toBe("hola");
+    expect(cleanNote("   ")).toBeNull();
+    expect(cleanNote("x".repeat(NOTE_MAX + 1))).toBeNull();
   });
 });

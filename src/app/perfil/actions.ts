@@ -84,6 +84,18 @@ export async function requestVerification(path: string, gesture: string): Promis
   return { ok: !error };
 }
 
+// Pausa o reanuda el perfil (D-27).
+export async function setPaused(paused: boolean): Promise<{ ok: boolean }> {
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/entrar");
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({ paused: paused === true })
+    .eq("id", user.id)
+    .select("id");
+  return { ok: !error && (data?.length ?? 0) === 1 };
+}
+
 export async function signOut() {
   const { supabase } = await getUser();
   await supabase.auth.signOut();

@@ -129,3 +129,20 @@ Detalles técnicos (se pueden revisar): columnas opcionales en `profiles` con su
 **Avisos en el móvil:** en Perfil, "Activar avisos". Avisa de una coincidencia nueva ("¡Tienes una coincidencia nueva!") y de un mensaje nuevo ("Tienes un mensaje nuevo."). **Sin nombres ni texto del mensaje**, porque se ven en la pantalla bloqueada. Al tocar el aviso se abre Coincidencias o el chat. En iPhone solo funciona si Zuvi está añadida a la pantalla de inicio (límite de Apple).
 *Por qué:* cuarto grupo de las 10 funciones que pidió Sergio el 2026-11-11; Claude lo recomendó como el más importante para que no se pierdan conversaciones.
 Detalles técnicos (se pueden revisar): avisos web estándar (Web Push con claves VAPID, gratis, sin servicios externos de pago) con el paquete `web-push` 3.6.7 y `public/sw.js`. Tabla `push_subscriptions` (cada uno ve y borra las suyas). El servidor de Next envía el aviso justo después del "me gusta" mutuo o del mensaje; para saber a dónde, usa `push_targets()`, que solo responde a quien acaba de provocar la coincidencia o escribir (2 minutos). Sin las variables `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_SUBJECT` en Vercel la app funciona igual pero no envía avisos.
+
+**D-25 a D-34 · 2026-11-11 · vigentes**
+**[Confirmado 2026-11-11]** Sergio pidió las 10 funciones de una segunda lista ("Quiero todas"), y destacó las notas de voz. Los detalles y textos son propuesta de Claude, a revisar en el PR. Detalles técnicos en la migración `20261111060000_mas_funciones.sql` y en [arquitectura.md](arquitectura.md).
+- **D-25 · Les gustas:** en Descubrir, un aviso "♥ Les gustas a N personas" lleva a una pila con solo quienes te dieron "me gusta" y aún no has contestado (de la más reciente a la más antigua). Gratis para todos. Solo salen personas que también podrías ver en Descubrir (tus filtros, distancia y edades).
+- **D-26 · Me gusta con mensaje:** botón 💬 en Descubrir. Hasta 200 caracteres. La otra persona lo ve en tu tarjeta ("Te ha escrito: …"), y esas tarjetas salen antes. Si coincidís, el mensaje pasa a ser el primero del chat.
+- **D-27 · Pausar mi perfil:** en Perfil. Mientras está en pausa no sales en Descubrir ni en "Les gustas" de nadie; tus coincidencias y chats siguen igual, y tú puedes seguir descubriendo.
+- **D-28 · Activo hace poco:** la tarjeta pone "● Activo hace poco" si la persona usó la app en las últimas 24 horas. Se apunta como mucho una vez cada 5 minutos, al usar las pantallas principales o el chat. Nunca se muestra la hora exacta.
+- **D-29 · Ideas para el primer mensaje:** en un chat vacío salen 3 ideas (una sobre una pregunta de su perfil, otra sobre una afición en común y alguna general). Al tocar una se copia al cuadro de texto, para editarla antes de enviar.
+- **D-30 · Notas de voz:** botón 🎤 en el chat (sale cuando el cuadro de texto está vacío). Graba hasta 1 minuto, con "Cancelar" y "Enviar". En la lista de coincidencias se ve "🎤 Audio". Van en la misma carpeta privada que las fotos del chat y se borran igual.
+- **D-31 · Reacciones:** tocar un mensaje de la otra persona muestra ❤️ 😂 😮 😢 👍 🔥. Una reacción por mensaje; tocar la misma la quita.
+- **D-32 · Borrar un mensaje:** tocar un mensaje propio muestra "Borrar para los dos". Queda "Mensaje eliminado" para las dos personas y se borra la foto o el audio. Sin límite de tiempo.
+- **D-33 · Ver mi perfil como lo ven los demás:** en Perfil, "👀 Ver mi perfil como lo ven los demás" enseña tu tarjeta igual que en Descubrir y todo el perfil debajo.
+- **D-34 · Bienvenida:** quien entra por primera vez (sin perfil) ve 3 pantallas cortas: qué es Zuvi y qué se ve de ti, cómo funciona, y consejos de seguridad. Se puede saltar.
+
+**D-35 · 2026-11-11 · vigente**
+**Repaso técnico antes de abrir** (decisión técnica de Claude, D-5): la hora de los mensajes la pone siempre la base; un móvil con avisos que cambia de cuenta deja de recibir los de la anterior, y "Salir" quita los avisos del móvil; la web envía cabeceras de seguridad (no se puede meter dentro de otra web, entre otras).
+*Por qué:* Sergio pidió dejar la app "perfecta" antes de abrir; son fallos encontrados al revisar todo el código.

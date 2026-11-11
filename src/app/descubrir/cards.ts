@@ -19,6 +19,9 @@ export type Card = {
   verified: boolean;
   details: string[];
   prompts: { question: string; answer: string }[];
+  // Mensaje que te dejó con su "me gusta" (D-26) y si usó la app en las últimas 24 horas (D-28).
+  noteToMe: string | null;
+  activeRecently: boolean;
 };
 
 type Row = {
@@ -39,12 +42,15 @@ type Row = {
   drinking: string | null;
   children: string | null;
   verified: boolean;
+  note_to_me: string | null;
+  active_recently: boolean | null;
 };
 
 // Los próximos perfiles de Descubrir, con sus fotos como enlaces firmados de una hora.
 // Qué perfiles se ven lo decide la base (discover_profiles en supabase/migrations).
-export async function loadCards(supabase: SupabaseClient): Promise<Card[]> {
-  const { data, error } = await supabase.rpc("discover_profiles", { max_results: 10 });
+// Con onlyLikers, solo quienes te dieron "me gusta" (D-25).
+export async function loadCards(supabase: SupabaseClient, onlyLikers = false): Promise<Card[]> {
+  const { data, error } = await supabase.rpc("discover_profiles", { max_results: 10, only_likers: onlyLikers });
   if (error || !data) return [];
   const rows = data as Row[];
   const paths = rows.flatMap((r) => r.photo_paths);
@@ -74,5 +80,7 @@ export async function loadCards(supabase: SupabaseClient): Promise<Card[]> {
     prompts: (r.prompts ?? [])
       .filter((p) => Object.prototype.hasOwnProperty.call(PROMPTS, p.key))
       .map((p) => ({ question: PROMPTS[p.key as keyof typeof PROMPTS], answer: p.answer })),
+    noteToMe: r.note_to_me,
+    activeRecently: r.active_recently === true,
   }));
 }

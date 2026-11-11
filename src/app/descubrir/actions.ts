@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import cities from "@/data/ciudades-es.json";
+import { cleanNote } from "@/lib/chat";
 import { isValidLocation, searchCities, type City } from "@/lib/discover";
 import { sendPush } from "@/lib/supabase/sendPush";
 import { getUser } from "@/lib/supabase/server";
@@ -52,6 +53,18 @@ export async function swipe(
   return { ok: !error, match };
 }
 
+// "Me gusta" con un mensaje (D-26). Si hay coincidencia, el mensaje abre el chat.
+export async function likeWithNote(targetId: string, note: string): Promise<{ ok: boolean; match: boolean }> {
+  const clean = cleanNote(String(note));
+  if (!clean) return { ok: false, match: false };
+  const { supabase, user } = await getUser();
+  if (!user) redirect("/entrar");
+  const { data, error } = await supabase.rpc("like_with_note", { target: targetId, note: clean });
+  const match = !error && data === true;
+  if (match) await sendPush(supabase, targetId, "match");
+  return { ok: !error, match };
+}
+
 // El superlike del día (D-17). `ok: false` con `limit: true` si ya se usó hoy.
 export async function superlike(targetId: string): Promise<{ ok: boolean; match: boolean; limit: boolean }> {
   const { supabase, user } = await getUser();
@@ -70,8 +83,8 @@ export async function undoPass(targetId: string): Promise<{ ok: boolean }> {
   return { ok: !error && data === true };
 }
 
-export async function nextCards(): Promise<Card[]> {
+export async function nextCards(onlyLikers = false): Promise<Card[]> {
   const { supabase, user } = await getUser();
   if (!user) redirect("/entrar");
-  return loadCards(supabase);
+  return loadCards(supabase, onlyLikers === true);
 }

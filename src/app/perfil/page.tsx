@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AppNav } from "@/components/AppNav";
@@ -8,6 +9,7 @@ import { BlockedList } from "./BlockedList";
 import { Verification } from "./Verification";
 import { PushToggle } from "./PushToggle";
 import { SignOutButton } from "./SignOutButton";
+import { PauseToggle } from "./PauseToggle";
 import { DeleteAccount } from "./DeleteAccount";
 import { ProfileForm, type Photo } from "./ProfileForm";
 
@@ -21,6 +23,9 @@ export default function ProfilePage() {
         </div>
         <Suspense fallback={<p className="text-zinc-500">Cargando…</p>}>
           <Profile />
+        </Suspense>
+        <Suspense fallback={null}>
+          <ProfileExtrasBox />
         </Suspense>
         <Suspense fallback={null}>
           <Verification />
@@ -98,6 +103,25 @@ async function Profile() {
         interests: profile?.interests ?? [],
       }}
     />
+  );
+}
+
+// "Ver mi perfil como lo ven los demás" (D-33) y "Pausar mi perfil" (D-27). Solo con perfil creado.
+async function ProfileExtrasBox() {
+  const { supabase, user } = await getUser();
+  if (!user) return null;
+  const { data } = await supabase.from("profiles").select("paused").eq("id", user.id).maybeSingle();
+  if (!data) return null;
+  return (
+    <>
+      <Link
+        href="/perfil/vista"
+        className="rounded-2xl border border-zinc-200 p-4 font-medium dark:border-zinc-800"
+      >
+        👀 Ver mi perfil como lo ven los demás <span aria-hidden>›</span>
+      </Link>
+      <PauseToggle initialPaused={data.paused === true} />
+    </>
   );
 }
 
