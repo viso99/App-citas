@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AppNav } from "@/components/AppNav";
 import { getUser } from "@/lib/supabase/server";
+import { activeTravelCity, TRAVEL_CITIES } from "@/lib/travel";
 import { loadCards } from "./cards";
 import { NeedsLocation } from "./NeedsLocation";
 import { SwipeDeck } from "./SwipeDeck";
@@ -25,7 +26,7 @@ async function Discover() {
   const { supabase, user } = await getUser();
   if (!user) redirect("/entrar");
 
-  const { data: profile } = await supabase.from("profiles").select("lat, paused").eq("id", user.id).maybeSingle();
+  const { data: profile } = await supabase.from("profiles").select("lat, paused, travel_city, travel_started_at").eq("id", user.id).maybeSingle();
   // Sin perfil no se puede descubrir: primero la bienvenida y después el perfil (D-34).
   if (!profile) redirect("/bienvenida");
   if (profile.lat === null) return <NeedsLocation />;
@@ -35,6 +36,7 @@ async function Discover() {
     supabase.rpc("superlikes_left"),
     supabase.rpc("likes_me_count"),
   ]);
+  const travel = activeTravelCity(profile.travel_city, profile.travel_started_at);
   const likesCount = typeof likes === "number" ? likes : 0;
   return (
     <>
@@ -43,6 +45,14 @@ async function Discover() {
           Tu perfil está en pausa: nadie nuevo te ve en Descubrir.{" "}
           <Link href="/perfil" className="underline">
             Quitar la pausa
+          </Link>
+        </p>
+      )}
+      {travel && (
+        <p className="rounded-2xl bg-sky-100 px-4 py-3 text-sm text-sky-900">
+          <span aria-hidden>✈️ </span>Estás de viaje en {TRAVEL_CITIES[travel].name}.{" "}
+          <Link href="/perfil" className="underline">
+            Cambiar
           </Link>
         </p>
       )}

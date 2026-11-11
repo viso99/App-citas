@@ -10,6 +10,12 @@ describe("pushPayload", () => {
       url: "/coincidencias",
     });
     expect(pushPayload("message", "abc").url).toBe("/chat/abc");
+    expect(pushPayload("reminder", "abc")).toEqual({
+      title: "Zuvi",
+      body: "Tienes una conversación esperando.",
+      tag: "chat-abc",
+      url: "/chat/abc",
+    });
   });
 });
 

@@ -8,7 +8,7 @@ Leé este archivo entero al empezar cada sesión. Es corto a propósito: dice qu
 - **Plataforma [Confirmado 2026-11-09]:** **web pensada para el celular**, que se abre en el navegador y se puede agregar a la pantalla de inicio. Las apps de las tiendas quedan para después.
 - **Primera versión [Confirmado 2026-11-09]:** registro de mayores de 18 y perfil con fotos, ver gente cercana y deslizar, coincidencia mutua, chat entre quienes coincidieron, y bloquear y denunciar. Nada más.
 - **Tecnología (D-6):** Next.js 16 con TypeScript y Supabase (en la UE). **Next.js 16 cambió mucho:** leé `AGENTS.md` antes de escribir código de Next.
-- **Estado del código:** registro y perfil con fotos funcionando (probado por Sergio). Descubrir y coincidencias publicados; chat y bloquear/denunciar hechos en código. Extras después de la primera versión (superlike, aficiones, aviso de novedades, ordenar fotos, control, chat, perfil más completo, avisos en el móvil y una segunda lista de 10 con notas de voz, reacciones y "les gustas") hechos en código. Ver [docs/estado-actual.md](docs/estado-actual.md).
+- **Estado del código:** registro y perfil con fotos funcionando (probado por Sergio). Descubrir y coincidencias publicados; chat y bloquear/denunciar hechos en código. Extras después de la primera versión (superlike, aficiones, aviso de novedades, ordenar fotos, control, chat, perfil más completo, avisos en el móvil una segunda lista de 10 con notas de voz, reacciones y "les gustas", y una tercera de 7 con qué buscas, responder, compartir mi cita, modo viaje, recordatorios y descargar mis datos) hechos en código. Ver [docs/estado-actual.md](docs/estado-actual.md).
 
 ## Mapa de la documentación
 
@@ -18,7 +18,7 @@ Leé este archivo entero al empezar cada sesión. Es corto a propósito: dice qu
 | Qué hay realmente en el repo hoy | [docs/estado-actual.md](docs/estado-actual.md) | Antes de tocar código o de afirmar que algo existe |
 | Cómo está organizado el código y la base de datos | [docs/arquitectura.md](docs/arquitectura.md) | Antes de agregar pantallas, tablas o reglas |
 | Cómo correr, probar y configurar Supabase | [docs/desarrollo.md](docs/desarrollo.md) | Antes de compilar o verificar un cambio |
-| Decisiones tomadas y por qué | [docs/decisiones.md](docs/decisiones.md) | Antes de cambiar rumbo, tecnología o alcance |
+| Decisiones tomadas y por qué | [docs/decisiones.md](docs/decisiones.md) (D-1 a D-35) y [docs/decisiones-2.md](docs/decisiones-2.md) (desde D-36) | Antes de cambiar rumbo, tecnología o alcance |
 | Privacidad, edad y obligaciones legales (RGPD) | [docs/privacidad-y-legal.md](docs/privacidad-y-legal.md) | Antes de tocar registro, perfiles, fotos, ubicación, chat o datos de usuarios |
 | Preguntas abiertas y supuestos | [docs/pendientes.md](docs/pendientes.md) | Antes de decidir algo que todavía no está cerrado |
 | Vocabulario del proyecto | [docs/glosario.md](docs/glosario.md) | Al hablar con Sergio o escribir textos de la app |
@@ -69,7 +69,7 @@ Si algo no tiene etiqueta, tratalo como supuesto.
 ## Cómo mantener esta memoria
 
 - Cuando cambie una decisión, una funcionalidad o una regla importante, actualizá el doc del tema **en el mismo PR** que el cambio.
-- Una decisión nueva va a `docs/decisiones.md` con fecha, estado y porqué. Si reemplaza a otra, marcá la vieja como "reemplazada por D-N"; no la borres.
+- Una decisión nueva va a `docs/decisiones-2.md` con fecha, estado y porqué. Si reemplaza a otra, marcá la vieja como "reemplazada por D-N"; no la borres.
 - Cuando se resuelva un pendiente, sacalo de `docs/pendientes.md` y llevalo a `decisiones.md` o al doc del tema.
 - Cuando cambie el código, actualizá `docs/estado-actual.md` (y `docs/arquitectura.md` si cambia la estructura o la base) con la nueva fecha de verificación.
 - Antes de abrir un PR con código: `npm run lint`, `npm run typecheck`, `npm test` y `npm run build` tienen que pasar.

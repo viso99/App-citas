@@ -11,6 +11,7 @@ import {
   isRead,
   MESSAGE_COLUMNS,
   MESSAGE_MAX,
+  messagePreview,
   REACTIONS,
   TYPING_SEND_EVERY_MS,
   TYPING_SHOWN_MS,
@@ -29,6 +30,8 @@ export type Message = {
   a_reaction: string | null;
   b_reaction: string | null;
   deleted_at: string | null;
+  // Mensaje al que responde (D-37).
+  reply_to: string | null;
   created_at: string;
 };
 
@@ -65,6 +68,8 @@ export function ChatRoom({
   const [otherTyping, setOtherTyping] = useState(false);
   // Mensaje tocado: muestra las reacciones (si es de la otra persona) o "Borrar" (si es mío).
   const [selected, setSelected] = useState<string | null>(null);
+  // Mensaje al que se va a responder (D-37).
+  const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [recordingFor, setRecordingFor] = useState(0);
   const [recording, setRecording] = useState(false);
   const bottom = useRef<HTMLDivElement>(null);
@@ -166,11 +171,12 @@ export function ChatRoom({
   async function insert(body: string, files: { image_path?: string; audio_path?: string } = {}) {
     const { data, error } = await createClient()
       .from("messages")
-      .insert({ user_a: userA, user_b: userB, sender_id: me, body, ...files })
+      .insert({ user_a: userA, user_b: userB, sender_id: me, body, reply_to: replyTo?.id ?? null, ...files })
       .select(MESSAGE_COLUMNS)
       .single();
     if (error || !data) return false;
     upsert(data as Message);
+    setReplyTo(null);
     notifyMessage(otherId).catch(() => undefined);
     return true;
   }
@@ -275,6 +281,15 @@ export function ChatRoom({
     upsert({ ...m, body: "", image_path: null, audio_path: null, a_reaction: null, b_reaction: null, deleted_at: new Date().toISOString() });
   }
 
+  function startReply(m: Message) {
+    setSelected(null);
+    setReplyTo(m);
+    document.getElementById("chat-input")?.focus();
+  }
+
+  const byId = new Map(messages.map((m) => [m.id, m]));
+  const author = (m: Message | undefined) => (m ? (m.sender_id === me ? "Tú" : otherName) : "");
+
   // "Leído" o "Enviado" solo bajo mi último mensaje.
   const lastMine = [...messages].reverse().find((m) => m.sender_id === me);
 
@@ -308,7 +323,11 @@ export function ChatRoom({
           const reaction = m.sender_id === userA ? m.b_reaction : m.a_reaction;
           const isSelected = selected === m.id && !deleted;
           return (
-            <div key={m.id} className={`flex max-w-[80%] flex-col ${mine ? "self-end items-end" : "self-start"}`}>
+            <div
+              key={m.id}
+              id={`msg-${m.id}`}
+              className={`flex max-w-[80%] scroll-mt-4 flex-col ${mine ? "self-end items-end" : "self-start"}`}
+            >
               <div className="relative">
                 <div
                   role="button"
@@ -333,6 +352,21 @@ export function ChatRoom({
                     <p>Mensaje eliminado</p>
                   ) : (
                     <>
+                      {m.reply_to && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            document.getElementById(`msg-${m.reply_to}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                          }}
+                          className={`mb-1 block w-full rounded-lg border-l-4 px-2 py-1 text-left text-sm ${
+                            mine ? "border-white/70 bg-white/15 text-white/90" : "border-rose-500 bg-black/5 text-zinc-600 dark:bg-white/10 dark:text-zinc-300"
+                          }`}
+                        >
+                          <span className="block text-xs font-semibold">{author(byId.get(m.reply_to)) || "Respuesta a"}</span>
+                          {messagePreview(byId.get(m.reply_to))}
+                        </button>
+                      )}
                       {m.image_path && <ChatImage path={m.image_path} />}
                       {m.audio_path && <ChatAudio path={m.audio_path} />}
                       {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
@@ -360,10 +394,17 @@ export function ChatRoom({
                   ))}
                 </div>
               )}
-              {isSelected && mine && (
-                <button type="button" onClick={() => remove(m)} className="mt-1 text-sm text-red-600 underline">
-                  Borrar para los dos
-                </button>
+              {isSelected && (
+                <div className="mt-1 flex gap-4 text-sm">
+                  <button type="button" onClick={() => startReply(m)} className="font-medium text-rose-600 underline">
+                    Responder
+                  </button>
+                  {mine && (
+                    <button type="button" onClick={() => remove(m)} className="text-red-600 underline">
+                      Borrar para los dos
+                    </button>
+                  )}
+                </div>
               )}
               {m === lastMine && !isSelected && (
                 <span className={`text-xs text-zinc-500 ${reaction ? "mt-3" : "mt-0.5"}`}>
@@ -377,6 +418,19 @@ export function ChatRoom({
         <div ref={bottom} />
       </div>
       {error && <p className="px-4 text-sm text-red-600">{error}</p>}
+      {replyTo && (
+        <div className="flex items-center gap-2 border-t border-zinc-200 px-4 py-2 dark:border-zinc-800">
+          <div className="min-w-0 flex-1 border-l-4 border-rose-500 pl-2 text-sm">
+            <span className="block text-xs font-semibold text-rose-600">
+              Respondiendo a {replyTo.sender_id === me ? "ti" : otherName}
+            </span>
+            <span className="block truncate text-zinc-500">{messagePreview(replyTo)}</span>
+          </div>
+          <button type="button" onClick={() => setReplyTo(null)} aria-label="No responder" className="px-2 text-xl text-zinc-500">
+            ×
+          </button>
+        </div>
+      )}
       {recording ? (
         <div className="flex items-center gap-3 border-t border-zinc-200 p-3 dark:border-zinc-800">
           <span className="flex-1 font-medium text-red-600" aria-live="polite">
@@ -411,6 +465,7 @@ export function ChatRoom({
             />
           </label>
           <input
+            id="chat-input"
             value={text}
             onChange={(e) => onType(e.target.value)}
             maxLength={MESSAGE_MAX}

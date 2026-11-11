@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AppNav } from "@/components/AppNav";
+import { extrasFromRow } from "@/lib/profileExtras";
 import { DEFAULT_DISTANCE_KM, DEFAULT_MAX_AGE, DEFAULT_MIN_AGE } from "@/lib/discover";
 import { PHOTOS_BUCKET } from "@/lib/supabase/config";
 import { getUser } from "@/lib/supabase/server";
@@ -10,6 +11,8 @@ import { Verification } from "./Verification";
 import { PushToggle } from "./PushToggle";
 import { SignOutButton } from "./SignOutButton";
 import { PauseToggle } from "./PauseToggle";
+import { TravelMode } from "./TravelMode";
+import { activeTravelCity } from "@/lib/travel";
 import { DeleteAccount } from "./DeleteAccount";
 import { ProfileForm, type Photo } from "./ProfileForm";
 
@@ -73,19 +76,13 @@ async function Profile() {
       hasProfile={Boolean(profile)}
       locationUpdatedAt={profile?.location_updated_at ?? null}
       initialMore={{
-        extras: {
-          heightCm: profile?.height_cm ?? null,
-          job: profile?.job ?? "",
-          studies: profile?.studies ?? null,
-          smoking: profile?.smoking ?? null,
-          drinking: profile?.drinking ?? null,
-          children: profile?.children ?? null,
-        },
+        extras: extrasFromRow(profile),
         prompts: profile?.prompts ?? [],
         filters: {
           onlyNonSmokers: profile?.filter_non_smokers ?? false,
           onlyWantsChildren: profile?.filter_wants_children ?? false,
           onlyVerified: profile?.filter_verified ?? false,
+          onlySameGoal: profile?.filter_same_goal ?? false,
         },
       }}
       initialPreferences={{
@@ -106,11 +103,16 @@ async function Profile() {
   );
 }
 
-// "Ver mi perfil como lo ven los demás" (D-33) y "Pausar mi perfil" (D-27). Solo con perfil creado.
+// "Ver mi perfil como lo ven los demás" (D-33), "Pausar mi perfil" (D-27), modo viaje (D-39) y
+// descargar mis datos (D-42). Solo con perfil creado.
 async function ProfileExtrasBox() {
   const { supabase, user } = await getUser();
   if (!user) return null;
-  const { data } = await supabase.from("profiles").select("paused").eq("id", user.id).maybeSingle();
+  const { data } = await supabase
+    .from("profiles")
+    .select("paused, travel_city, travel_started_at")
+    .eq("id", user.id)
+    .maybeSingle();
   if (!data) return null;
   return (
     <>
@@ -121,6 +123,17 @@ async function ProfileExtrasBox() {
         👀 Ver mi perfil como lo ven los demás <span aria-hidden>›</span>
       </Link>
       <PauseToggle initialPaused={data.paused === true} />
+      <TravelMode initialCity={activeTravelCity(data.travel_city, data.travel_started_at)} />
+      <a
+        href="/perfil/mis-datos"
+        download
+        className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800"
+      >
+        <span className="font-medium">📦 Descargar mis datos</span>
+        <span className="block text-sm text-zinc-500">
+          Un archivo con todo lo que Zuvi guarda de ti: perfil, fotos, me gusta, coincidencias y tus mensajes.
+        </span>
+      </a>
     </>
   );
 }

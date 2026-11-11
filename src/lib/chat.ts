@@ -3,9 +3,23 @@
 
 export const MESSAGE_MAX = 1000;
 
-// Columnas de un mensaje que usa el chat (D-22, D-30, D-31, D-32).
+// Columnas de un mensaje que usa el chat (D-22, D-30, D-31, D-32, D-37).
 export const MESSAGE_COLUMNS =
-  "id, sender_id, body, image_path, audio_path, a_reaction, b_reaction, deleted_at, created_at";
+  "id, sender_id, body, image_path, audio_path, a_reaction, b_reaction, deleted_at, reply_to, created_at";
+
+// Texto corto de un mensaje para citarlo al responder (D-37).
+export const QUOTE_MAX = 80;
+export function messagePreview(
+  m: { body: string; image_path: string | null; audio_path: string | null; deleted_at: string | null } | undefined,
+): string {
+  if (!m) return "Mensaje anterior";
+  if (m.deleted_at) return "Mensaje eliminado";
+  const body = m.body.trim().replace(/\s+/g, " ");
+  if (body) return body.length > QUOTE_MAX ? `${body.slice(0, QUOTE_MAX - 1)}…` : body;
+  if (m.audio_path) return "🎤 Audio";
+  if (m.image_path) return "📷 Foto";
+  return "Mensaje";
+}
 
 // Una coincidencia se guarda con el id menor primero (tabla `matches`). Los uuid en minúsculas
 // se ordenan igual como texto que en PostgreSQL.
