@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { validatePreferences, type PreferenceErrors, type Preferences } from "@/lib/discover";
 import { photoCountError, validateProfile, type ProfileErrors, type ProfileInput } from "@/lib/profile";
 import { PHOTOS_BUCKET } from "@/lib/supabase/config";
+import { chatFolder } from "@/lib/chat";
+import { removeChatPhotos } from "@/lib/supabase/chatPhotos";
 import { getUser } from "@/lib/supabase/server";
 
 export type SaveResult = { ok: true } | { ok: false; errors: ProfileErrors & PreferenceErrors; message?: string };
@@ -67,6 +69,12 @@ export async function deleteAccount(): Promise<{ ok: false }> {
     const { error } = await bucket.remove(files.map((f) => `${user.id}/${f.name}`));
     if (error) return { ok: false };
   }
+
+  // Las fotos de sus chats (D-22), mientras las coincidencias existen.
+  const { data: matches, error: matchesError } = await supabase.rpc("my_matches");
+  if (matchesError) return { ok: false };
+  const folders = ((matches ?? []) as { id: string }[]).map((m) => chatFolder(user.id, m.id));
+  if (!(await removeChatPhotos(supabase, folders))) return { ok: false };
 
   const { error } = await supabase.rpc("delete_my_account");
   if (error) return { ok: false };

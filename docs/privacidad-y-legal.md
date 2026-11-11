@@ -24,7 +24,7 @@ Son decisiones técnicas tomadas por Claude (D-5), coherentes con lo de arriba. 
 5. **Consentimiento explícito** para los datos sensibles (orientación, preferencias), separado de la aceptación de condiciones.
 6. **Borrar la cuenta borra los datos:** la persona puede eliminar su cuenta y sus datos desde la app (en Perfil, "Eliminar mi cuenta"). Se borran los archivos de fotos y, en cascada, todo lo demás. Qué pasa con las denuncias: S-3 en [pendientes.md](pendientes.md).
 7. **Fotos privadas por defecto en el almacenamiento:** solo las ve un usuario que tiene permiso de verlas, no cualquiera con el enlace.
-8. **Chat privado:** solo lo leen las dos personas que coincidieron. Las reglas de acceso se aplican en la base de datos, no solo en la pantalla.
+8. **Chat privado:** solo lo leen las dos personas que coincidieron. Las reglas de acceso se aplican en la base de datos, no solo en la pantalla. Las fotos del chat (D-22) van a un almacenamiento privado que solo ven esas dos personas, y se borran al deshacer la coincidencia, bloquear, denunciar o borrar la cuenta.
 9. **Bloquear** corta todo contacto en las dos direcciones. **Denunciar** guarda la denuncia para revisión y bloquea (D-14). Las denuncias no se ven desde la app: solo quien revisa, en Supabase.
 
 ## Antes de abrir la app a usuarios reales

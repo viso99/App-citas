@@ -22,6 +22,7 @@ Qué hay **realmente** en el repo. No es lo que el producto debe hacer: eso est�
 | Aficiones (D-18) | **Hecho en código, sin probar con gente real.** En el perfil, hasta 5 de 62 por grupos. En la tarjeta, las comunes primero y en color |
 | Ordenar las fotos (D-20) | **Hecho en código (rama `claude/project-thread-ss52zm`), sin probar con gente real.** Flechas en cada foto del perfil; la primera lleva "Principal" |
 | Control (D-21) | **Hecho en código (rama `claude/project-thread-ss52zm`), sin probar con gente real.** Deshacer el último paso, personas bloqueadas en Perfil, deshacer coincidencia en el chat. La migración `20261111010000_control.sql` se probó en PostgreSQL local; **todavía no está aplicada en Supabase** |
+| Chat: leído, escribiendo y fotos (D-22) | **Hecho en código, sin probar con gente real.** La migración `20261111020000_chat_extras.sql` se probó en PostgreSQL local; **todavía no está aplicada en Supabase** |
 | Aviso de novedades (D-19) | **Hecho en código, sin probar con gente real.** Punto en "Coincidencias" y etiqueta "Nuevo"; se marca como visto al abrir el chat. No hay notificaciones fuera de la app |
 
 ## Límites conocidos

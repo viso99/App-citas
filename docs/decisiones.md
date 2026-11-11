@@ -107,3 +107,11 @@ Detalles técnicos (se pueden revisar): no hace falta cambiar la base; se usa la
 - **Deshacer una coincidencia:** en el menú "⋯" del chat. Se borra la conversación y no os volvéis a ver en Descubrir. La otra persona no recibe aviso.
 *Por qué:* Sergio pidió las 10 funciones propuestas el 2026-11-11 ("Los haría todos"); este es el primer grupo. Los detalles y textos son propuesta de Claude, a revisar en el PR.
 Detalles técnicos (se pueden revisar): funciones `undo_pass()`, `my_blocks()`, `unblock_user()` y `unmatch()` (migración `20261111010000_control.sql`). Sin tablas nuevas.
+
+**D-22 · 2026-11-11 · vigente**
+**Chat más completo:**
+- **Leído:** bajo tu último mensaje pone "Enviado" o "Leído" (cuando la otra persona abrió el chat después). Se actualiza en el momento.
+- **Está escribiendo:** aparece "<nombre> está escribiendo…" mientras la otra persona escribe (desaparece a los 4 segundos sin teclear).
+- **Fotos en el chat:** botón 📷 para enviar una foto (JPG, PNG o WebP, hasta 5 MB). En la lista de coincidencias se ve "📷 Foto".
+*Por qué:* segundo grupo de las 10 funciones que pidió Sergio el 2026-11-11. Textos propuestos por Claude, a revisar en el PR.
+Detalles técnicos (se pueden revisar): "Leído" usa `matches.a_seen_at`/`b_seen_at` (D-19), con `matches` en Supabase Realtime. "Escribiendo" va por Realtime *broadcast* en el canal del chat, sin guardarse en la base; el nombre del canal lleva los dos ids, así que en la práctica no se puede adivinar, pero no está protegido por RLS (solo revela si alguien escribe). Las fotos van a un bucket privado `chat-photos`, carpeta `<user_a>_<user_b>/`, que solo pueden ver, subir y borrar las dos personas mientras la coincidencia existe. La app borra esas fotos **antes** de deshacer la coincidencia, bloquear, denunciar o borrar la cuenta (si no, quedarían huérfanas). No se pueden denunciar fotos sueltas: se denuncia a la persona.

@@ -102,6 +102,10 @@ Migración `20261111010000_control.sql` (D-21): `undo_pass()` borra un "paso" pr
 
 **[Verificado 2026-11-11]** en el PostgreSQL local: deshacer un "paso" devuelve el perfil a Descubrir y no deshace un "me gusta"; la lista de bloqueos solo la ve quien bloqueó y desbloquear devuelve el perfil a Descubrir; quien fue bloqueado no puede quitar el bloqueo; deshacer coincidencia borra la coincidencia y sus mensajes; sin sesión no se pueden llamar.
 
+Migración `20261111020000_chat_extras.sql` (D-22): `matches` entra en Realtime (para el "Leído"); `messages.image_path` y el texto puede ir vacío si hay foto; bucket privado `chat-photos` con reglas basadas en `is_my_chat_folder()`; `my_matches()` muestra "📷 Foto". `src/lib/supabase/chatPhotos.ts` borra las fotos de un chat antes de que desaparezca la coincidencia.
+
+**[Verificado 2026-11-11]** en el PostgreSQL local, aplicando todas las migraciones desde cero: mensaje con solo foto aceptado; vacío sin foto rechazado; foto de otra carpeta rechazada; un tercero no tiene acceso a la carpeta del chat; la lista muestra "📷 Foto".
+
 ## Reglas de arquitectura
 
 1. Las reglas críticas van **en la base** (RLS, triggers, CHECK) además de en la app. La app ayuda con mensajes claros; la base es la que protege.
