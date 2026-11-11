@@ -13,6 +13,7 @@ import {
 import { validatePhoto } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/client";
 import { CHAT_PHOTOS_BUCKET } from "@/lib/supabase/config";
+import { notifyMessage } from "./actions";
 
 export type Message = {
   id: string;
@@ -126,6 +127,7 @@ export function ChatRoom({
       .single();
     if (error || !data) return false;
     add(data as Message);
+    notifyMessage(otherId).catch(() => undefined);
     return true;
   }
 

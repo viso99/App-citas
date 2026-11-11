@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import cities from "@/data/ciudades-es.json";
 import { isValidLocation, searchCities, type City } from "@/lib/discover";
+import { sendPush } from "@/lib/supabase/sendPush";
 import { getUser } from "@/lib/supabase/server";
 import { loadCards, type Card } from "./cards";
 
@@ -46,7 +47,9 @@ export async function swipe(
   const { supabase, user } = await getUser();
   if (!user) redirect("/entrar");
   const { data, error } = await supabase.rpc("swipe", { target: targetId, choice });
-  return { ok: !error, match: !error && data === true };
+  const match = !error && data === true;
+  if (match) await sendPush(supabase, targetId, "match");
+  return { ok: !error, match };
 }
 
 // El superlike del día (D-17). `ok: false` con `limit: true` si ya se usó hoy.
@@ -55,6 +58,7 @@ export async function superlike(targetId: string): Promise<{ ok: boolean; match:
   if (!user) redirect("/entrar");
   const { data, error } = await supabase.rpc("superlike", { target: targetId });
   if (error) return { ok: false, match: false, limit: error.code === "23514" };
+  if (data === true) await sendPush(supabase, targetId, "match");
   return { ok: true, match: data === true, limit: false };
 }
 

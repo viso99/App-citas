@@ -110,6 +110,10 @@ Migración `20261111030000_perfil_extras.sql` (D-23): `profiles` suma `prompts` 
 
 **[Verificado 2026-11-11]** en el PostgreSQL local: preguntas repetidas, con campos de más u opciones inventadas se rechazan; nadie puede escribir en `verifications` ni marcarse verificado; los filtros de no fumadores y verificados quitan a quien no cumple; quien revisa al marcar `verified_at` hace que salga la insignia; nadie ve verificaciones ajenas.
 
+Migración `20261111040000_avisos_movil.sql` (D-24): tabla `push_subscriptions` con RLS (cada uno las suyas); `push_targets(other, kind)` devuelve a dónde avisar a la otra persona solo si quien llama acaba de crear la coincidencia o escribir (2 minutos); `forget_push_endpoint()` borra direcciones caducadas. Envío desde `src/lib/supabase/sendPush.ts` (servidor), activación en `src/app/perfil/PushToggle.tsx`, textos en `src/lib/push.ts` y `public/sw.js` muestra el aviso.
+
+**[Verificado 2026-11-11]** en el PostgreSQL local: quien acaba de escribir obtiene las direcciones de la otra persona; pasados 2 minutos, quien no escribió o un tercero no obtiene nada; nadie ve ni crea direcciones ajenas.
+
 ## Reglas de arquitectura
 
 1. Las reglas críticas van **en la base** (RLS, triggers, CHECK) además de en la app. La app ayuda con mensajes claros; la base es la que protege.

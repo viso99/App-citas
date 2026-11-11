@@ -50,6 +50,15 @@ En Supabase, **Table Editor → `verifications`**: las filas con `verified_at` y
 - Si coincide y hace el gesto: completá `verified_at` con la fecha y hora actual. La tarjeta pasa a llevar "✔".
 - Si no: completá `rejected_at`. La persona verá que no se pudo verificar y podrá enviar otro.
 
+## Avisos en el móvil (D-24)
+
+Necesitan tres variables en Vercel (Settings → Environment Variables) y en `.env.local` para probar en local:
+
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY` y `VAPID_PRIVATE_KEY`: se generan una vez con `npx web-push generate-vapid-keys`. La privada es secreta: nunca en el repositorio ni en el chat. Si se cambian, los avisos ya activados dejan de funcionar y cada persona tiene que volver a activarlos.
+- `VAPID_SUBJECT`: la dirección de la app (`https://app-citas-khaki.vercel.app`, y la de zuvi.es cuando exista).
+
+Sin ellas la app funciona, pero el botón de Perfil dice que el navegador no permite avisos.
+
 ## Avisos para quien programe
 
 - **Next.js 16:** cambió respecto de versiones anteriores. Leé `AGENTS.md` y la guía en `node_modules/next/dist/docs/` antes de escribir código de Next. Por ejemplo: el "middleware" ahora se llama `src/proxy.ts`, y con `cacheComponents` todo lo que lee la sesión tiene que estar dentro de un `<Suspense>`.
