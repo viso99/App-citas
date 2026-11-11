@@ -114,6 +114,14 @@ Migración `20261111040000_avisos_movil.sql` (D-24): tabla `push_subscriptions` 
 
 **[Verificado 2026-11-11]** en el PostgreSQL local: quien acaba de escribir obtiene las direcciones de la otra persona; pasados 2 minutos, quien no escribió o un tercero no obtiene nada; nadie ve ni crea direcciones ajenas.
 
+Migración `20261111050000_repaso.sql` (repaso antes de abrir): la hora de cada mensaje la pone siempre la base (trigger `messages_set_time`), para que nadie mande horas inventadas; `save_push_subscription()` guarda el móvil para los avisos y, si estaba a nombre de otra cuenta, lo pasa a la actual. Al pulsar "Salir" (`src/app/perfil/SignOutButton.tsx`) se quitan los avisos de ese móvil. `next.config.ts` añade cabeceras de seguridad (la app no se puede meter dentro de otra web, entre otras).
+
+**[Verificado 2026-11-11]** en el PostgreSQL local: un mensaje enviado con una hora futura se guarda con la hora real; un móvil guardado por una cuenta pasa a otra al activarlo allí, y queda una sola fila.
+
+Migración `20261111060000_mas_funciones.sql` (D-25 a D-34): `profiles.paused` (excluido en `can_see_profile()`) y `profiles.last_active_at` (lo apunta `touch_activity()` desde la barra de abajo y el chat); `swipes.note` con `like_with_note()` y `record_swipe()` que, al crear la coincidencia, copia las notas como primeros mensajes; `discover_profiles(max_results, only_likers)` devuelve `note_to_me` y `active_recently`; `likes_me_count()`; `icebreaker_info(other)` (solo con coincidencia); `messages.audio_path`, `a_reaction`/`b_reaction` (las escribe solo `react_to_message()`) y `deleted_at` (lo escribe solo `delete_message()`, que devuelve las rutas de archivos a borrar); el bucket `chat-photos` admite audio. Pantallas nuevas: `/descubrir/les-gustas`, `/perfil/vista` y `/bienvenida`. La tarjeta se dibuja con `src/app/descubrir/CardView.tsx` (Descubrir y vista previa). Ideas del primer mensaje en `src/lib/icebreakers.ts`.
+
+**[Verificado 2026-11-11]** en el PostgreSQL local: el "me gusta" con mensaje se ve en la tarjeta y abre el chat en orden al coincidir; un "paso" no puede llevar mensaje; un perfil en pausa no sale en Descubrir; nadie reacciona a sus propios mensajes ni con emojis fuera de la lista; nadie borra mensajes ajenos ni puede cambiar un mensaje directamente; la lista de coincidencias muestra "Mensaje eliminado"; `icebreaker_info()` no responde sin coincidencia; `swipe()` y `superlike()` siguen funcionando.
+
 ## Reglas de arquitectura
 
 1. Las reglas críticas van **en la base** (RLS, triggers, CHECK) además de en la app. La app ayuda con mensajes claros; la base es la que protege.

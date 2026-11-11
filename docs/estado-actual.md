@@ -20,16 +20,18 @@ Qué hay **realmente** en el repo. No es lo que el producto debe hacer: eso est�
 |---|---|
 | Superlike (D-17) | **Hecho en código, sin probar con gente real.** Botón ★ en Descubrir, 1 al día. Quien lo recibe ve la tarjeta primero, con borde azul y "★ Te ha dado un superlike" |
 | Aficiones (D-18) | **Hecho en código, sin probar con gente real.** En el perfil, hasta 5 de 62 por grupos. En la tarjeta, las comunes primero y en color |
-| Ordenar las fotos (D-20) | **Hecho en código (rama `claude/project-thread-ss52zm`), sin probar con gente real.** Flechas en cada foto del perfil; la primera lleva "Principal" |
+| Ordenar las fotos (D-20) | **Publicado, sin probar con gente real.** Flechas en cada foto del perfil; la primera lleva "Principal" |
 | Control (D-21) | **Publicado (PR #18), sin probar con gente real.** Deshacer el último paso, personas bloqueadas en Perfil, deshacer coincidencia en el chat. La migración `20261111010000_control.sql` se probó en PostgreSQL local y **[Verificado 2026-11-11]** está aplicada en Supabase |
 | Chat: leído, escribiendo y fotos (D-22) | **Hecho en código, sin probar con gente real.** La migración `20261111020000_chat_extras.sql` se probó en PostgreSQL local y **[Verificado 2026-11-11]** está aplicada en Supabase (`matches` en Realtime, bucket `chat-photos`) |
 | Perfil más completo (D-23) | **Hecho en código, sin probar con gente real.** Datos opcionales, preguntas, filtros y verificación con selfie (revisión manual en Supabase). La migración `20261111030000_perfil_extras.sql` se probó en PostgreSQL local y **[Verificado 2026-11-11]** está aplicada en Supabase (columnas nuevas, `verifications` y bucket `verification-photos`) |
-| Avisos en el móvil (D-24) | **Hecho en código, sin probar.** La migración `20261111040000_avisos_movil.sql` se probó en local y **[Verificado 2026-11-11]** está aplicada en Supabase. Faltan las claves VAPID en Vercel (las pone Sergio) |
+| Avisos en el móvil (D-24) | **Publicado, sin probar con gente real.** La migración `20261111040000_avisos_movil.sql` está aplicada en Supabase y **[Verificado 2026-11-11]** las 3 claves VAPID están en Vercel |
+| Segunda lista de 10 (D-25 a D-34) | **Hecho en código (rama `claude/project-thread-ss52zm`), sin probar con gente real.** Les gustas, me gusta con mensaje, pausar el perfil, activo hace poco, ideas para el primer mensaje, notas de voz, reacciones, borrar mensajes, ver mi perfil como lo ven y bienvenida. La migración `20261111060000_mas_funciones.sql` se probó en local y **[Verificado 2026-11-11]** está aplicada en Supabase (funciones, columnas nuevas y `discover_profiles(max_results, only_likers)`) |
+| Repaso antes de abrir | **Hecho en código (rama `claude/project-thread-ss52zm`).** La hora de los mensajes la pone la base, los avisos de un móvil no pasan a otra cuenta, "Salir" quita los avisos del móvil y cabeceras de seguridad. La migración `20261111050000_repaso.sql` se probó en local y **[Verificado 2026-11-11]** está aplicada en Supabase |
 | Aviso de novedades (D-19) | **Hecho en código, sin probar con gente real.** Punto en "Coincidencias" y etiqueta "Nuevo"; se marca como visto al abrir el chat. No hay notificaciones fuera de la app |
 
 ## Límites conocidos
 
 - La app se llama **Zuvi** (D-15), pero todavía no tiene dominio, logo ni ícono propios (P-1).
-- La coincidencia se avisa en el momento a quien da el segundo "me gusta"; la otra persona la ve con el punto de novedades cuando abre la app (no hay notificaciones del móvil).
+- La coincidencia se avisa en el momento a quien da el segundo "me gusta"; la otra persona la ve con el punto de novedades y, si activó los avisos en el móvil, con una notificación (D-24).
 - No se puede deshacer un "me gusta". Del "paso" solo se puede deshacer el último (D-21).
 - Los correos de acceso salen provisionalmente por el Gmail de Sergio (D-16), con un límite de 30 por hora. Si se pasa, la app pide esperar un rato. Antes de abrir a gente real hay que pasarlos a una dirección de zuvi.es.

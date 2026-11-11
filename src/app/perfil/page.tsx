@@ -1,13 +1,15 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AppNav } from "@/components/AppNav";
 import { DEFAULT_DISTANCE_KM, DEFAULT_MAX_AGE, DEFAULT_MIN_AGE } from "@/lib/discover";
 import { PHOTOS_BUCKET } from "@/lib/supabase/config";
 import { getUser } from "@/lib/supabase/server";
-import { signOut } from "./actions";
 import { BlockedList } from "./BlockedList";
 import { Verification } from "./Verification";
 import { PushToggle } from "./PushToggle";
+import { SignOutButton } from "./SignOutButton";
+import { PauseToggle } from "./PauseToggle";
 import { DeleteAccount } from "./DeleteAccount";
 import { ProfileForm, type Photo } from "./ProfileForm";
 
@@ -17,14 +19,13 @@ export default function ProfilePage() {
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Tu perfil</h1>
-          <form action={signOut}>
-            <button type="submit" className="text-zinc-500 underline">
-              Salir
-            </button>
-          </form>
+          <SignOutButton />
         </div>
         <Suspense fallback={<p className="text-zinc-500">Cargando…</p>}>
           <Profile />
+        </Suspense>
+        <Suspense fallback={null}>
+          <ProfileExtrasBox />
         </Suspense>
         <Suspense fallback={null}>
           <Verification />
@@ -102,6 +103,25 @@ async function Profile() {
         interests: profile?.interests ?? [],
       }}
     />
+  );
+}
+
+// "Ver mi perfil como lo ven los demás" (D-33) y "Pausar mi perfil" (D-27). Solo con perfil creado.
+async function ProfileExtrasBox() {
+  const { supabase, user } = await getUser();
+  if (!user) return null;
+  const { data } = await supabase.from("profiles").select("paused").eq("id", user.id).maybeSingle();
+  if (!data) return null;
+  return (
+    <>
+      <Link
+        href="/perfil/vista"
+        className="rounded-2xl border border-zinc-200 p-4 font-medium dark:border-zinc-800"
+      >
+        👀 Ver mi perfil como lo ven los demás <span aria-hidden>›</span>
+      </Link>
+      <PauseToggle initialPaused={data.paused === true} />
+    </>
   );
 }
 

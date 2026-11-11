@@ -3,16 +3,26 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { SafetyMenu } from "@/components/safety/SafetyMenu";
-import { distanceLabel } from "@/lib/discover";
-import { nextCards, superlike, swipe, undoPass } from "./actions";
+import { cleanNote, NOTE_MAX } from "@/lib/chat";
+import { likeWithNote, nextCards, superlike, swipe, undoPass } from "./actions";
 import type { Card } from "./cards";
+import { CardFace, ProfileDetails } from "./CardView";
 
 const SWIPE_THRESHOLD = 100; // píxeles de arrastre para decidir
 const TAP_SLOP = 8; // menos que esto es un toque, no un arrastre
 
 type Choice = "me_gusta" | "paso" | "superlike";
 
-export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: Card[]; initialSuperlikes: number }) {
+// `onlyLikers`: la versión "Les gustas", con solo quienes te dieron "me gusta" (D-25).
+export function SwipeDeck({
+  initialCards,
+  initialSuperlikes,
+  onlyLikers = false,
+}: {
+  initialCards: Card[];
+  initialSuperlikes: number;
+  onlyLikers?: boolean;
+}) {
   const [cards, setCards] = useState(initialCards);
   const [superlikesLeft, setSuperlikesLeft] = useState(initialSuperlikes);
   const [photo, setPhoto] = useState(0);
@@ -26,6 +36,8 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
   const [lastPassed, setLastPassed] = useState<{ card: Card; saved: Promise<unknown> } | null>(null);
   const [undoing, setUndoing] = useState(false);
   const [showMore, setShowMore] = useState<Card | null>(null);
+  // "Me gusta" con mensaje (D-26): la tarjeta a la que se escribe.
+  const [writing, setWriting] = useState<Card | null>(null);
   const decided = useRef(new Set<string>());
   const loading = useRef(false);
   const start = useRef<{ x: number; y: number } | null>(null);
@@ -36,7 +48,7 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
   useEffect(() => {
     if (exhausted || loading.current || cards.length > 2) return;
     loading.current = true;
-    nextCards()
+    nextCards(onlyLikers)
       .then((more) => {
         const fresh = more.filter((c) => !decided.current.has(c.id));
         if (fresh.length === 0) setExhausted(true);
@@ -48,9 +60,9 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
       .finally(() => {
         loading.current = false;
       });
-  }, [cards.length, exhausted]);
+  }, [cards.length, exhausted, onlyLikers]);
 
-  function decide(choice: Choice) {
+  function decide(choice: Choice, note?: string) {
     if (!card || leaving) return;
     if (choice === "superlike" && superlikesLeft < 1) {
       setError("Ya has usado tu superlike de hoy. Mañana tendrás otro.");
@@ -78,7 +90,8 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
       });
       return;
     }
-    const saved = swipe(target.id, choice).then(({ ok, match }) => {
+    const request = note ? likeWithNote(target.id, note) : swipe(target.id, choice);
+    const saved = request.then(({ ok, match }) => {
       if (!ok) setError("No pudimos guardar tu respuesta. Comprueba la conexión.");
       else if (match) setMatchWith(target);
     });
@@ -154,6 +167,16 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
     <>
       {matchWith && <MatchOverlay card={matchWith} onClose={() => setMatchWith(null)} />}
       {showMore && <MoreSheet card={showMore} onClose={() => setShowMore(null)} />}
+      {writing && (
+        <NoteSheet
+          card={writing}
+          onClose={() => setWriting(null)}
+          onSend={(note) => {
+            setWriting(null);
+            decide("me_gusta", note);
+          }}
+        />
+      )}
     </>
   );
 
@@ -161,8 +184,19 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
         {overlay}
-        <p className="text-lg">{exhausted ? "No hay más perfiles cerca por ahora." : "Buscando perfiles…"}</p>
-        {exhausted && (
+        <p className="text-lg">
+          {!exhausted
+            ? "Buscando perfiles…"
+            : onlyLikers
+              ? "Ya has contestado a todas las personas a las que les gustas."
+              : "No hay más perfiles cerca por ahora."}
+        </p>
+        {exhausted && onlyLikers && (
+          <Link href="/descubrir" className="text-rose-600 underline">
+            Volver a Descubrir
+          </Link>
+        )}
+        {exhausted && !onlyLikers && (
           <p className="text-zinc-600 dark:text-zinc-300">
             Vuelve más tarde o amplía la distancia y las edades en{" "}
             <Link href="/perfil" className="text-rose-600 underline">
@@ -207,62 +241,21 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
             card.superlikedMe ? "ring-4 ring-sky-500" : ""
           }`}
         >
-          {card.photos[photo] && (
-            // eslint-disable-next-line @next/next/no-img-element -- enlaces firmados y temporales
-            <img src={card.photos[photo]} alt="" draggable={false} className="h-full w-full object-cover" />
-          )}
-          {card.photos.length > 1 && (
-            <div className="absolute inset-x-3 top-3 flex gap-1">
-              {card.photos.map((_, i) => (
-                <span key={i} className={`h-1 flex-1 rounded-full ${i === photo ? "bg-white" : "bg-white/40"}`} />
-              ))}
-            </div>
-          )}
-          {card.superlikedMe && (
-            <span className="absolute left-3 top-6 rounded-full bg-sky-500 px-3 py-1 text-sm font-semibold text-white shadow">
-              ★ Te ha dado un superlike
-            </span>
-          )}
-          {hint && (
-            <span
-              className={`absolute top-8 rounded-lg border-4 px-3 py-1 text-2xl font-bold uppercase ${
-                hint === "me_gusta"
-                  ? "left-6 -rotate-12 border-green-500 text-green-500"
-                  : hint === "paso"
-                    ? "right-6 rotate-12 border-red-500 text-red-500"
-                    : "inset-x-0 bottom-40 mx-auto w-fit border-sky-500 text-sky-500"
-              }`}
-            >
-              {hint === "me_gusta" ? "Me gusta" : hint === "paso" ? "Paso" : "Superlike"}
-            </span>
-          )}
-          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 to-transparent p-5 pt-16 text-white">
-            <p className="text-2xl font-bold">
-              {card.firstName}, {card.age}
-              {card.verified && (
-                <span className="ml-2 align-middle text-base text-sky-300" title="Perfil verificado">
-                  ✔<span className="sr-only"> Perfil verificado</span>
-                </span>
-              )}
-            </p>
-            <p className="text-sm text-white/80">{distanceLabel(card.distanceKm)}</p>
-            {card.bio && <p className="line-clamp-3 text-white/90">{card.bio}</p>}
-            {card.interests.length > 0 && (
-              <ul className="mt-1 flex flex-wrap gap-1" aria-label="Aficiones">
-                {card.interests.map((i) => (
-                  <li
-                    key={i.key}
-                    className={`rounded-full px-2 py-0.5 text-xs ${
-                      i.shared ? "bg-rose-600 font-semibold text-white" : "bg-white/20 text-white"
-                    }`}
-                  >
-                    {i.label}
-                    {i.shared && <span className="sr-only"> (en común)</span>}
-                  </li>
-                ))}
-              </ul>
+          <CardFace card={card} photo={photo}>
+            {hint && (
+              <span
+                className={`absolute top-8 rounded-lg border-4 px-3 py-1 text-2xl font-bold uppercase ${
+                  hint === "me_gusta"
+                    ? "left-6 -rotate-12 border-green-500 text-green-500"
+                    : hint === "paso"
+                      ? "right-6 rotate-12 border-red-500 text-red-500"
+                      : "inset-x-0 bottom-40 mx-auto w-fit border-sky-500 text-sky-500"
+                }`}
+              >
+                {hint === "me_gusta" ? "Me gusta" : hint === "paso" ? "Paso" : "Superlike"}
+              </span>
             )}
-          </div>
+          </CardFace>
         </div>
         {!leaving && !dragging && (
           <button
@@ -284,7 +277,7 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
         )}
       </div>
 
-      <div className="flex items-center justify-center gap-6">
+      <div className="flex items-center justify-center gap-4">
         <button
           type="button"
           onClick={() => decide("paso")}
@@ -304,6 +297,15 @@ export function SwipeDeck({ initialCards, initialSuperlikes }: { initialCards: C
           }`}
         >
           ★
+        </button>
+        <button
+          type="button"
+          onClick={() => setWriting(card)}
+          disabled={Boolean(leaving)}
+          aria-label="Me gusta con mensaje"
+          className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-rose-200 bg-white text-2xl text-rose-600 shadow"
+        >
+          💬
         </button>
         <button
           type="button"
@@ -332,44 +334,68 @@ function MoreSheet({ card, onClose }: { card: Card; onClose: () => void }) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="flex max-h-[85dvh] w-full max-w-md flex-col gap-4 overflow-y-auto rounded-t-3xl bg-white p-6 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100">
-        <h2 className="text-2xl font-bold">
-          {card.firstName}, {card.age} {card.verified && <span className="text-base text-sky-600">✔ Verificado</span>}
-        </h2>
-        <p className="text-sm text-zinc-500">{distanceLabel(card.distanceKm)}</p>
-        {card.bio && <p className="whitespace-pre-wrap">{card.bio}</p>}
-        {card.details.length > 0 && (
-          <ul className="flex flex-wrap gap-2">
-            {card.details.map((d) => (
-              <li key={d} className="rounded-full bg-zinc-100 px-3 py-1 text-sm dark:bg-zinc-800">
-                {d}
-              </li>
-            ))}
-          </ul>
-        )}
-        {card.prompts.map((p) => (
-          <div key={p.question} className="rounded-2xl bg-zinc-100 p-4 dark:bg-zinc-800">
-            <p className="text-sm text-zinc-500">{p.question}</p>
-            <p className="text-lg font-semibold">{p.answer}</p>
-          </div>
-        ))}
-        {card.interests.length > 0 && (
-          <ul className="flex flex-wrap gap-2" aria-label="Aficiones">
-            {card.interests.map((i) => (
-              <li
-                key={i.key}
-                className={`rounded-full px-3 py-1 text-sm ${
-                  i.shared ? "bg-rose-600 font-semibold text-white" : "bg-zinc-100 dark:bg-zinc-800"
-                }`}
-              >
-                {i.label}
-              </li>
-            ))}
-          </ul>
-        )}
+        <ProfileDetails card={card} />
         <button type="button" onClick={onClose} className="rounded-full bg-rose-600 px-6 py-3 font-semibold text-white">
           Cerrar
         </button>
       </div>
+    </div>
+  );
+}
+
+// "Me gusta" con mensaje (D-26): la otra persona lo ve en tu tarjeta y, si coincidís, abre el chat.
+function NoteSheet({ card, onClose, onSend }: { card: Card; onClose: () => void; onSend: (note: string) => void }) {
+  const [text, setText] = useState("");
+  const note = cleanNote(text);
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Escribir a ${card.firstName}`}
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (note) onSend(note);
+        }}
+        className="flex w-full max-w-md flex-col gap-3 rounded-t-3xl bg-white p-6 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
+      >
+        <h2 className="text-xl font-bold">Dale me gusta a {card.firstName} con un mensaje</h2>
+        <p className="text-sm text-zinc-500">
+          Lo verá en tu tarjeta. Si os gustáis, será el primer mensaje de vuestro chat.
+        </p>
+        {card.prompts[0] && (
+          <button
+            type="button"
+            onClick={() => setText(`Sobre «${card.prompts[0].question.replace(/…$/, "")}»: `)}
+            className="w-fit rounded-full bg-zinc-100 px-3 py-1 text-left text-sm dark:bg-zinc-800"
+          >
+            Comentar su respuesta: {card.prompts[0].question}
+          </button>
+        )}
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          maxLength={NOTE_MAX}
+          rows={3}
+          autoFocus
+          placeholder="Escribe algo que te haya llamado la atención…"
+          className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 focus:border-rose-500 focus:outline-none"
+        />
+        <p className="text-right text-xs text-zinc-500">
+          {text.length}/{NOTE_MAX}
+        </p>
+        <div className="flex gap-3">
+          <button type="button" onClick={onClose} className="flex-1 rounded-full border border-zinc-300 px-4 py-3 font-semibold dark:border-zinc-700">
+            Cancelar
+          </button>
+          <button type="submit" disabled={!note} className="flex-1 rounded-full bg-rose-600 px-4 py-3 font-semibold text-white disabled:opacity-50">
+            Enviar ♥
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

@@ -26,6 +26,7 @@ Son decisiones técnicas tomadas por Claude (D-5), coherentes con lo de arriba. 
 7. **Fotos privadas por defecto en el almacenamiento:** solo las ve un usuario que tiene permiso de verlas, no cualquiera con el enlace.
 8. **Chat privado:** solo lo leen las dos personas que coincidieron. Las reglas de acceso se aplican en la base de datos, no solo en la pantalla. Las fotos del chat (D-22) van a un almacenamiento privado que solo ven esas dos personas, y se borran al deshacer la coincidencia, bloquear, denunciar o borrar la cuenta.
 9. **Bloquear** corta todo contacto en las dos direcciones. **Denunciar** guarda la denuncia para revisión y bloquea (D-14). Las denuncias no se ven desde la app: solo quien revisa, en Supabase.
+10. **Notas de voz y "activo hace poco"** (D-30, D-28): los audios van al mismo almacenamiento privado que las fotos del chat y se borran igual. De la actividad solo se guarda la última vez que se usó la app (redondeada a 5 minutos) y a los demás solo se les dice "activo hace poco" (últimas 24 horas), nunca la hora. **[Supuesto]**: puede convenir una opción para ocultarlo; a valorar con el profesional (P-9).
 
 ## Antes de abrir la app a usuarios reales
 

@@ -43,6 +43,19 @@ Tiene **nombre, marca y diseño propios**. "Como Tinder" describe el tipo de app
 7. **Perfil más completo** (D-23): datos opcionales (altura, trabajo, estudios, tabaco, alcohol, hijos), hasta 3 preguntas con respuesta corta, filtros en Descubrir (no fuma, quiere hijos, verificado) y perfil verificado con un selfie que revisa Sergio.
 8. **Avisos en el móvil** (D-24): cada persona puede activarlos en Perfil; avisan de coincidencias y mensajes nuevos sin enseñar nombres ni mensajes.
 
+**[Confirmado 2026-11-11]** Y una segunda lista de 10 (D-25 a D-34), todas gratis:
+
+9. **Les gustas:** ver quién te dio "me gusta" y contestar.
+10. **Me gusta con mensaje:** un texto corto que la otra persona ve en tu tarjeta y que abre el chat si coincidís.
+11. **Pausar mi perfil:** dejar de salir en Descubrir sin borrar nada.
+12. **Activo hace poco:** en la tarjeta, si la persona usó la app en las últimas 24 horas.
+13. **Ideas para el primer mensaje** en un chat vacío.
+14. **Notas de voz** en el chat, hasta 1 minuto.
+15. **Reacciones** a mensajes con un emoji.
+16. **Borrar un mensaje** propio para los dos.
+17. **Ver mi perfil como lo ven los demás.**
+18. **Bienvenida** de 3 pantallas al entrar por primera vez, con consejos de seguridad.
+
 **[Confirmado 2026-11-09]** Registro con correo y código (D-7). El perfil lleva nombre de pila, fecha de nacimiento, de 2 a 6 fotos, descripción corta opcional, género y a quién quiere conocer (D-8).
 
 Los demás detalles (a qué distancia, a quién se le muestra cada perfil, cómo se verifica la edad, qué pasa al bloquear o denunciar) **no están definidos**. Están en [pendientes.md](pendientes.md). No los inventes: preguntale a Sergio o registralos como supuesto.

@@ -21,7 +21,16 @@ export function PushToggle({ userId }: { userId: string }) {
       }
       if (Notification.permission === "denied") return "denied";
       const reg = await navigator.serviceWorker.getRegistration("/sw.js");
-      return (await reg?.pushManager.getSubscription()) ? "on" : "off";
+      const sub = await reg?.pushManager.getSubscription();
+      if (!sub) return "off";
+      // El móvil puede tener avisos activos de otra cuenta que entró antes: solo cuentan los míos.
+      const { data } = await createClient()
+        .from("push_subscriptions")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("endpoint", sub.endpoint)
+        .maybeSingle();
+      return data ? "on" : "off";
     };
     check()
       .catch((): State => "off")
@@ -29,7 +38,7 @@ export function PushToggle({ userId }: { userId: string }) {
     return () => {
       alive = false;
     };
-  }, [publicKey]);
+  }, [publicKey, userId]);
 
   async function enable() {
     if (!publicKey) return;
@@ -44,14 +53,13 @@ export function PushToggle({ userId }: { userId: string }) {
         (await reg.pushManager.getSubscription()) ??
         (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: base64UrlToBytes(publicKey) }));
       const json = sub.toJSON();
-      const { error } = await createClient().from("push_subscriptions").insert({
-        user_id: userId,
+      // Si el móvil estaba a nombre de otra cuenta, pasa a esta (así no recibe avisos ajenos).
+      const { error } = await createClient().rpc("save_push_subscription", {
         endpoint: sub.endpoint,
         p256dh: json.keys?.p256dh ?? "",
         auth: json.keys?.auth ?? "",
       });
-      // 23505: ese móvil ya estaba guardado.
-      if (error && error.code !== "23505") throw error;
+      if (error) throw error;
       setState("on");
     } catch {
       setError("No pudimos activar los avisos en este móvil.");
