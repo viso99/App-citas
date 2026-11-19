@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import webpush from "web-push";
 import { pushPayload } from "@/lib/push";
@@ -8,7 +9,7 @@ import { pushPayload } from "@/lib/push";
 // dos claves configuradas en Vercel y nunca desde el navegador. Sin ellas, no hace nada.
 export async function GET(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret || request.headers.get("authorization") !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || !sameSecret(request.headers.get("authorization") ?? "", `Bearer ${cronSecret}`)) {
     return new Response("No autorizado.", { status: 401 });
   }
 
@@ -46,4 +47,11 @@ export async function GET(request: Request) {
     }),
   );
   return Response.json({ sent });
+}
+
+// Compara la clave sin dar pistas por el tiempo que tarda (contra adivinarla de a una letra).
+function sameSecret(a: string, b: string) {
+  const ha = createHash("sha256").update(a).digest();
+  const hb = createHash("sha256").update(b).digest();
+  return timingSafeEqual(ha, hb);
 }

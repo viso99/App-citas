@@ -30,6 +30,10 @@ Qué hay **realmente** en el repo. No es lo que el producto debe hacer: eso est�
 | Tercera lista de 7 (D-36 a D-42) | **Hecho en código (rama `claude/project-thread-ss52zm`), sin probar con gente real.** Qué buscas (con filtro), responder a un mensaje, compartir mi cita, modo viaje, idiomas, mascotas y signo, recordatorio de chats parados y descargar mis datos. **[Verificado 2026-11-11]** lint, typecheck, 58 pruebas y build pasan, y la migración `20261111070000_tercera_lista.sql` se probó en PostgreSQL 16 local con todas las anteriores (viaje en las dos direcciones y caducidad, filtro de qué buscas, citar solo mensajes del mismo chat, recordatorio una sola vez y solo con la clave secreta, y la descarga). **[Verificado 2026-11-11]** está aplicada en Supabase (D-13): 12 columnas nuevas, 6 funciones, el disparador de respuestas, `take_chat_reminders()` solo para la clave secreta y `export_my_data()` sin acceso anónimo. Para los recordatorios falta poner `SUPABASE_SECRET_KEY` y `CRON_SECRET` en Vercel |
 | Aviso de novedades (D-19) | **Hecho en código, sin probar con gente real.** Punto en "Coincidencias" y etiqueta "Nuevo"; se marca como visto al abrir el chat. No hay notificaciones fuera de la app |
 
+## Seguridad
+
+**[Verificado 2026-11-19]** Agente revisor, revisión semanal, CodeQL, Dependabot y `npm audit` en la CI. Detalle y hallazgos conocidos en [seguridad.md](seguridad.md).
+
 ## Límites conocidos
 
 - La app se llama **Zuvi** (D-15), pero todavía no tiene dominio, logo ni ícono propios (P-1).
