@@ -19,3 +19,10 @@ Detalles técnicos (se pueden revisar, D-5):
 - Responder: columna `messages.reply_to` y un disparador que solo deja citar mensajes del mismo chat.
 - Recordatorio: tarea programada de Vercel (`vercel.json`, gratis en el plan Hobby, una vez al día) que llama a `/api/recordatorios`. Esa ruta usa la **clave secreta de Supabase** (`SUPABASE_SECRET_KEY`) y la protege `CRON_SECRET`; las dos van solo en Vercel. `take_chat_reminders()` solo la puede llamar esa clave, y apunta en `matches.a_reminded_at` / `b_reminded_at` a quién ya se avisó. Sin esas variables no se envía nada y el resto de la app funciona igual.
 - Descargar mis datos: `export_my_data()` arma el JSON en la base y `/perfil/mis-datos` lo entrega como archivo.
+
+---
+
+**D-43 · 2026-11-19 · vigente**
+**[Confirmado 2026-11-19]** Sergio pidió "agentes para evitar hackeos". Claude eligió (D-5, todo gratis): un agente de Claude `seguridad` que revisa cada cambio antes del PR, una revisión semanal automática de Claude que abre un PR si encuentra algo, CodeQL y Dependabot de GitHub, y `npm audit` en la CI. Detalle y hallazgos en [seguridad.md](seguridad.md).
+*Por qué:* el repo es público y la app guarda datos muy sensibles; varias capas baratas cubren cosas distintas (errores de código, librerías viejas, reglas de la base). Sin issues públicos para fallos, para no avisar a un atacante antes del arreglo.
+Detalles técnicos: `vitest` pasa a la 5 y `@types/node` a la 22 (igual que la CI) para quitar un fallo crítico de una librería de pruebas.

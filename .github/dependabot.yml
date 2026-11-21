@@ -1,0 +1,27 @@
+# Dependabot (gratis): una vez por semana revisa las librerías de la app y las acciones de
+# GitHub, y abre un PR cuando hay una versión nueva. Los arreglos de seguridad urgentes los abre
+# en cuanto salen (eso se activa en Settings → Code security, ver docs/seguridad.md).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: Europe/Madrid
+    open-pull-requests-limit: 5
+    groups:
+      # Las actualizaciones pequeñas van juntas en un solo PR para no llenar la lista.
+      menores:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: Europe/Madrid
+    groups:
+      acciones:
+        patterns: ["*"]

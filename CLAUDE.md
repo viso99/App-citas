@@ -19,6 +19,7 @@ Leé este archivo entero al empezar cada sesión. Es corto a propósito: dice qu
 | Cómo está organizado el código y la base de datos | [docs/arquitectura.md](docs/arquitectura.md) | Antes de agregar pantallas, tablas o reglas |
 | Cómo correr, probar y configurar Supabase | [docs/desarrollo.md](docs/desarrollo.md) | Antes de compilar o verificar un cambio |
 | Decisiones tomadas y por qué | [docs/decisiones.md](docs/decisiones.md) (D-1 a D-35) y [docs/decisiones-2.md](docs/decisiones-2.md) (desde D-36) | Antes de cambiar rumbo, tecnología o alcance |
+| Seguridad: quién vigila, hallazgos conocidos y el agente revisor | [docs/seguridad.md](docs/seguridad.md) | Antes de tocar base de datos, rutas del servidor, claves o dependencias |
 | Privacidad, edad y obligaciones legales (RGPD) | [docs/privacidad-y-legal.md](docs/privacidad-y-legal.md) | Antes de tocar registro, perfiles, fotos, ubicación, chat o datos de usuarios |
 | Preguntas abiertas y supuestos | [docs/pendientes.md](docs/pendientes.md) | Antes de decidir algo que todavía no está cerrado |
 | Vocabulario del proyecto | [docs/glosario.md](docs/glosario.md) | Al hablar con Sergio o escribir textos de la app |
@@ -72,6 +73,6 @@ Si algo no tiene etiqueta, tratalo como supuesto.
 - Una decisión nueva va a `docs/decisiones-2.md` con fecha, estado y porqué. Si reemplaza a otra, marcá la vieja como "reemplazada por D-N"; no la borres.
 - Cuando se resuelva un pendiente, sacalo de `docs/pendientes.md` y llevalo a `decisiones.md` o al doc del tema.
 - Cuando cambie el código, actualizá `docs/estado-actual.md` (y `docs/arquitectura.md` si cambia la estructura o la base) con la nueva fecha de verificación.
-- Antes de abrir un PR con código: `npm run lint`, `npm run typecheck`, `npm test` y `npm run build` tienen que pasar.
+- Antes de abrir un PR con código: `npm run lint`, `npm run typecheck`, `npm test` y `npm run build` tienen que pasar, y hay que pasar el agente `seguridad` (`.claude/agents/seguridad.md`) y arreglar lo grave.
 - Cada dato vive en **un solo lugar**: los demás docs lo enlazan, no lo copian. Este archivo solo resume y apunta.
 - Si un doc pasa de ~150 líneas, dividilo por tema y sumalo al mapa de arriba.
