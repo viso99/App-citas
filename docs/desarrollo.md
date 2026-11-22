@@ -72,4 +72,4 @@ Una tarea programada de Vercel (`vercel.json`) llama una vez al día a `/api/rec
 - `SUPABASE_SECRET_KEY`: Supabase → Project Settings → API Keys → Secret keys.
 - `CRON_SECRET`: un texto largo al azar. Vercel lo manda solo en la llamada de la tarea, y la ruta rechaza cualquier otra.
 
-Sin ellas, la ruta no hace nada y el resto de la app funciona igual.
+Sin ellas, la ruta no hace nada. `SUPABASE_SECRET_KEY` también la usan los avisos de coincidencias y mensajes (desde 2026-11-22, S-4 en [seguridad.md](seguridad.md)): sin ella, no salen.
