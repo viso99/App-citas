@@ -33,7 +33,6 @@ Qué defensas hay contra ataques, quién vigila y qué hallazgos se conocen. La 
 
 ## Hallazgos conocidos (sin arreglar)
 
-
 - **S-1 · baja · Modo viaje sin caducidad garantizada:** quien llame a Supabase directamente (sin la app) puede poner `profiles.travel_started_at` en el futuro para que el modo viaje no caduque a los 30 días, o poner unas coordenadas de viaje que no son de la lista de ciudades. Solo cambia dónde aparece esa misma persona. Arreglo propuesto: un disparador que ponga la fecha con `now()` y una comprobación de que la ciudad es de la lista. Necesita migración.
 - **S-2 · baja · "Activo hace poco" se puede falsear:** la persona puede cambiar su propio `last_active_at`. Mismo tipo de arreglo.
 - **S-5 · baja · "Está escribiendo" en un canal abierto:** el canal de Realtime del chat no es privado; alguien que conozca los dos ids podría ver cuándo se escriben o mandar avisos falsos de "escribiendo". Los mensajes no se ven (respetan RLS). Arreglo: canal privado con política en `realtime.messages`. Necesita migración.
